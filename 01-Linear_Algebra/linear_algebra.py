@@ -64,6 +64,9 @@ class Vector():
         assert(is_numeric(other))
         return Vector(*[1/other * num for num in self.vector])
 
+    def __round__(self, ndigits):
+        return Vector(*[round(num, ndigits) for num in self.vector])
+
     def magnitude(self):
         """
         "Magnitude", "size", or "length" of the vector.
@@ -106,3 +109,40 @@ class Vector():
             angle = degrees(angle)
 
         return angle
+
+    def orthogonal_to(self, other):
+        return self.dot(other) == 0
+
+    def scalar_projection_onto(self, other):
+        """
+        Given vectors a & b, with angle theta between them:
+         - Knowing:
+           - cosine = cos(angle) = adjacent / hypotenuse
+           - cos(theta) = cosine_similarity = a . b / (||a|| * ||b||)
+         - Projection of a onto b:
+            1. ||a|| = hypotenuse
+            2. Projection of a onto b = adjacent
+            3. cos(theta) = adjacent / hypotenuse = Projection of a onto b / ||a||
+            4. Projection of a onto b = ||a|| * cos(theta)
+            5. Projection of a onto b = ||a|| * a . b / (||a|| * ||b||)
+            6. Projection of a onto b = a . b / ||b||
+        """
+        return (
+            self.dot(other) /
+            other.magnitude()
+        )
+
+    def normalize(self):
+        """
+        Convert vector to a vector of length one in the same direction
+        """
+        return self / self.magnitude()
+
+    def vector_projection_onto(self, other):
+        return self.scalar_projection_onto(other) * other.normalize()
+
+    def projection_onto(self, other, scalar=False):
+        if scalar:
+            return self.scalar_projection_onto(other)
+        else:
+            return self.vector_projection_onto(other)

@@ -88,6 +88,23 @@ def test_Vector():
             == round(pi/4, PRECISION)
         )
 
+        assert(Vector(1, 0).orthogonal_to(Vector(0, 1)) is True)
+        assert(Vector(1, 0).orthogonal_to(Vector(1, 1)) is False)
+        assert(Vector(1, 0).orthogonal_to(Vector(1, 0)) is False)
+
+        # Projections:
+        assert(Vector(2, 0).normalize() == Vector(1, 0))
+        assert(Vector(2227.9, 0).normalize() == Vector(1, 0))
+        assert(Vector(0, 2).normalize() == Vector(0, 1))
+        assert(Vector(10, 5, -6).scalar_projection_onto(Vector(3, -4, 0)) == 2)
+        assert(
+            round(
+                Vector(10, 5, -6).vector_projection_onto(Vector(3, -4, 0)),
+                PRECISION
+            )
+            == Vector(6/5, -8/5, 0)
+        )
+
         print("All Vector tests pass")
         return True
     except Exception:
