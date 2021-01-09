@@ -104,6 +104,51 @@ def test_Vector():
             )
             == Vector(6/5, -8/5, 0)
         )
+        assert(
+            Vector(10, 5, -6).vector_projection_scalar(Vector(3, -4, 0)) == 2/5
+        )
+
+        # Changing basis:
+        assert(
+            Vector(3, 4).change_basis(Vector(2, 1), Vector(-2, 4))
+            == Vector(2, 1/2)
+        )
+        assert(
+            round(
+                Vector(5, -1).change_basis(Vector(1, 1), Vector(1, -1)),
+                PRECISION
+            )
+            == Vector(2, 3)
+        )
+        assert(
+            Vector(10, -5).change_basis(Vector(3, 4), Vector(4, -3))
+            == Vector(2/5, 11/5)
+        )
+        assert(
+            round(
+                Vector(2, 2).change_basis(Vector(-3, 1), Vector(1, 3)),
+                PRECISION
+            )
+            == Vector(-2/5, 4/5)
+        )
+        assert(
+            round(
+                Vector(1, 1, 1).change_basis(
+                    Vector(2, 1, 0), Vector(1, -2, -1), Vector(-1, 2, -5)
+                ),
+                PRECISION
+            )
+            == round(Vector(3/5, -1/3, -2/15), PRECISION)
+        )
+        assert(
+            Vector(1, 1, 2, 3).change_basis(
+                Vector(1, 0, 0, 0),
+                Vector(0, 2, -1, 0),
+                Vector(0, 1, 2, 0),
+                Vector(0, 0, 0, 3)
+            )
+            == Vector(1, 0, 1, 1)
+        )
 
         print("All Vector tests pass")
         return True

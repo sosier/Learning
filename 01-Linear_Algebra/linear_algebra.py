@@ -1,4 +1,5 @@
 from math import sqrt, acos, degrees
+from itertools import combinations
 
 def is_numeric(object):
     return type(object) == int or type(object) == float
@@ -126,6 +127,9 @@ class Vector():
             4. Projection of a onto b = ||a|| * cos(theta)
             5. Projection of a onto b = ||a|| * a . b / (||a|| * ||b||)
             6. Projection of a onto b = a . b / ||b||
+
+        Note, the scalar projection is the length / magnitude of the projection,
+        i.e. how many unit vectors in the direction of b
         """
         return (
             self.dot(other) /
@@ -139,10 +143,27 @@ class Vector():
         return self / self.magnitude()
 
     def vector_projection_onto(self, other):
+        """
+        The projection of `self` onto `other` into vector form
+        """
         return self.scalar_projection_onto(other) * other.normalize()
 
-    def projection_onto(self, other, scalar=False):
-        if scalar:
-            return self.scalar_projection_onto(other)
-        else:
-            return self.vector_projection_onto(other)
+    def vector_projection_scalar(self, other):
+        """
+        The scalar amount by which the `other` vector must be scaled (multiplied)
+        to yield the vector projection
+        """
+        return self.scalar_projection_onto(other) / other.magnitude()
+
+    def change_basis(self, *basis_vectors):
+        assert(all([isinstance(vector, Vector) for vector in basis_vectors]))
+        assert(all([len(self) == len(vector) for vector in basis_vectors]))
+        assert(all([
+            # All basis vectors must be orthogonal to eachother
+            vector_a.orthogonal_to(vector_b)
+            for vector_a, vector_b in combinations(basis_vectors, 2)
+        ]))
+        return Vector(*[
+            self.vector_projection_scalar(basis_vector)
+            for basis_vector in basis_vectors
+        ])
