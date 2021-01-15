@@ -65,7 +65,7 @@ class Vector():
         assert(is_numeric(other))
         return Vector(*[1/other * num for num in self.vector])
 
-    def __round__(self, ndigits):
+    def __round__(self, ndigits=None):
         return Vector(*[round(num, ndigits) for num in self.vector])
 
     def magnitude(self):
@@ -167,3 +167,211 @@ class Vector():
             self.vector_projection_scalar(basis_vector)
             for basis_vector in basis_vectors
         ])
+
+class Matrix():
+    """
+    A matrix is an ordered, "rectangular" list of numbers (with rows and columns)
+    """
+    def __init__(self, *rows_of_numbers):
+        if (len(rows_of_numbers) == 1
+                and type(rows_of_numbers[0]) == list
+                and type(rows_of_numbers[0][0]) == list):
+            rows_of_numbers = rows_of_numbers[0]
+
+        for row in rows_of_numbers:
+            assert(type(row) == list)
+            assert(all(is_numeric(num) for num in row))
+            assert(len(row) == len(rows_of_numbers[0]))
+
+        self.matrix = list(rows_of_numbers)
+
+    def __str__(self):
+        return "\n".join([str(row) for row in self.matrix]) + "\n"
+
+    def dimensions(self):
+        """
+        Return the matrix dimensions (m x n) / (rows x columns) as a tuple:
+        (m, n) / (rows, columns)
+        """
+        return (
+            len(self.matrix),  # Rows
+            len(self.matrix[0])  # Columns
+        )
+
+    def __eq__(self, other):
+        try:
+            return (
+                self.dimensions() == other.dimensions()
+                and all(
+                    self_val == other_val
+                    for self_row, other_row in zip(self.matrix, other.matrix)
+                    for self_val, other_val in zip(self_row, other_row)
+                )
+            )
+        except:
+            return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __getitem__(self, i):
+        return self.matrix[i]
+
+    def __setitem__(self, i, value):
+        self.matrix[i] = value
+
+    def __round__(self, ndigits=None):
+        return Matrix([
+            [round(num, ndigits) for num in row]
+            for row in self.matrix
+        ])
+
+    def __mul__(self, other):
+        """
+        Matrix * Matrix & Matrix * Vector multiplication
+        """
+        assert(isinstance(other, Matrix) or isinstance(other, Vector))
+
+        if isinstance(other, Vector):
+            # Vector length == Matrix columns:
+            assert(len(other) == self.dimensions()[1])
+
+            return(Vector([
+                other.dot(Vector(row))
+                for row in self.matrix
+            ]))
+
+        if isinstance(other, Matrix):
+            # Left matrix columns== Right Matrix row:
+            assert(self.dimensions()[1] == other.dimensions()[0])
+
+            return Matrix([
+                [
+                    Vector(row).dot(
+                        Vector([other_row[col_i]
+                                for other_row in other.matrix])
+                    )
+                    for col_i in range(other.dimensions()[1])
+                ]
+                for row in self.matrix
+            ])
+
+    def convert_to_echelon_form(self, verbose=False):
+        """
+        Convert the matrix to echelon form, for example:
+        [[1, #, #, #],
+         [0, 1, #, #],
+         [0, 0, 1, #],
+         [0, 0, 0, 1]]
+        """
+        num_rows, num_columns = self.dimensions()
+        assert(num_rows <= num_columns)
+
+        # For convenience
+        M = self  # Matrix
+        if verbose:
+            print("Starting matrix:")
+            print(M)
+
+        # For each column in the matrix up to the number of rows...
+        for c in range(num_rows):
+            # 1. Normalize all rows with non-zero entries in that column to a
+            #    value of 1 in the column
+            for r in range(c, num_rows):
+                if M[r][c] != 0:
+                    M[r] = (Vector(M[r]) / M[r][c]).vector
+
+            if verbose:
+                print(f"After normalizing column {c}:")
+                print(M)
+
+            # 2. If the column's diagonal value == 0, find first row below where
+            #    that column's value is 1 and add it to the row with the
+            #    diagonal value
+            if M[c][c] == 0:
+                for r in range(c + 1, num_rows):
+                    if M[r][c] == 1:
+                        M[c] = (Vector(M[c]) + Vector(M[r])).vector
+                        break
+
+                if verbose:
+                    print(f"After dealing with a zero diagonal value in column {c}:")
+                    print(M)
+
+            if M[c][c] == 0:  # If that columns diagonal value is still 0
+                return False # No solution
+
+            # 3. Convert all rows below the row with the diagonal value to have
+            #    values of that in column by subtracting the diagonal row from
+            #    them
+            if (c + 1) < num_rows:  # If not on last column in for loop
+                for r in range(c + 1, num_rows):
+                    if M[r][c] == 1:
+                        M[r] = (Vector(M[r]) - Vector(M[c])).vector
+
+            if verbose:
+                print(f"After values in rows below column {c} diagonal to zero:")
+                print(M)
+
+        if verbose:
+            print(f"Final:")
+            print(M)
+
+        return M
+
+def solve_matrix_equation(matrix, vector, verbose=False):
+    """
+    Solves a linear matrix equation (system of linear equations) of the form
+    Ax = b, for example:
+     - 1*x + 2*y = 8
+     - 8*x + 1*y = 19
+
+    ...or in matrix form:
+     [[1, 2] * [x, = [8,
+      [8, 1]]   y]    19]
+
+    Requirements:
+     - `matrix` must be square and all its columns must be linearly independent
+       for the equation to have a solution
+     - `vector` must be of the same length as the number of rows in `matrix`
+    """
+    assert(isinstance(matrix, Matrix))
+    assert(isinstance(vector, Vector))
+    num_rows, num_columns = matrix.dimensions()
+    assert(num_rows == num_columns)  # Is square matrix
+    # Check if all `matrix` columns linearly independent?
+    assert(len(vector) == num_rows)
+
+    # 1. For ease of computation add `vector` as a column at the end of `matrix`
+    combined_matrix = Matrix([
+        row + [vector[i]]
+        for i, row in enumerate(matrix.matrix)
+    ])
+    CM = combined_matrix
+    assert(CM.dimensions()[1] == (num_columns + 1))
+
+    if verbose:
+        print(CM)
+
+    # 2. Reduce the combined matrix to "echelon" form
+    CM = CM.convert_to_echelon_form(verbose)
+
+    if verbose:
+        print(CM)
+
+    # 3. Solve the matrix by backward substituion
+    for c in reversed(range(num_columns)):
+        # For each column in the orignal matrix in reverse order
+        if c > 0:  # If not the first column
+            for r in range(c):
+                if CM[r][c] != 0:
+                    CM[r] = (Vector(CM[r]) - CM[r][c] * Vector(CM[c])).vector
+
+            if verbose:
+                print(CM)
+
+    if verbose:
+        print(CM)
+
+    # 4. The values in the final, appended column are the solution
+    return Vector([row[num_columns] for row in CM.matrix])

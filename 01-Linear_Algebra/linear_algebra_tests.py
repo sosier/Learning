@@ -1,7 +1,7 @@
 from math import sqrt, pi, cos
 import traceback
 
-from linear_algebra import is_numeric, Vector
+from linear_algebra import is_numeric, Vector, Matrix, solve_matrix_equation
 
 PRECISION = 10
 
@@ -157,5 +157,148 @@ def test_Vector():
         traceback.print_exc()
         return False
 
+def test_Matrix():
+    try:
+        # Check allowable input types:
+        m = Matrix(
+            [1, 2, 3],
+            [1, 2, 3],
+            [1, 2, 3]
+        )
+        m = Matrix([
+            [1, 2, 3],
+            [4, 5, 6],
+            [7, 8, 9]
+        ])
+
+        assert(m.dimensions() == (3, 3))
+        assert(Matrix([
+                [1, 2, 3],
+                [1, 2, 3]
+            ]).dimensions() == (2, 3)
+        )
+
+        # Check equalities:
+        assert((m == m) is True)
+        assert((m != m) is False)
+        assert((m == 1) is False)
+        assert((m != 1) is True)
+        assert(Matrix([1, 2, 3]) != Matrix([3, 2, 1]))
+        assert(Matrix([1, 2, 3]) != Vector([1, 2, 3]))
+        assert(
+            Matrix([1, 2, 3])
+            != Matrix([1], [2], [3])
+        )
+
+        # Check number getting / setting:
+        assert(m[2][0] == 7)
+        m[2][0] = 0
+        assert(m == Matrix([
+            [1, 2, 3],
+            [4, 5, 6],
+            [0, 8, 9]
+        ]))
+
+        # Rounding
+        assert(
+            round(Matrix([
+                [1.1, 2.9],
+                [4.7, 5.3]
+            ]), 0)
+            == Matrix([
+                [1, 3],
+                [5, 5]
+            ])
+        )
+
+        # Multiplication:
+        assert(
+            Matrix([
+                [1, 2],
+                [3, 4]
+            ]) * Vector(1, 2)
+            == Vector(5, 11)
+        )
+        assert(
+            Matrix([
+                [1, 2],
+                [3, 4]
+            ]) * Matrix([
+                [1, 2],
+                [3, 4]
+            ])
+            == Matrix([
+                [7,  10],
+                [15, 22]
+            ])
+        )
+
+        # Solving:
+        assert(
+            Matrix(
+                [1, 2],
+                [8, 1]
+            ).convert_to_echelon_form()
+            == Matrix(
+                [1, 2],
+                [0, 1]
+            )
+        )
+
+        print("All Matrix tests pass")
+        return True
+    except Exception:
+        print("Matrix TEST FAILED!")
+        traceback.print_exc()
+        return False
+
+def test_solve_matrix_equation():
+    try:
+        assert(
+            solve_matrix_equation(
+                Matrix(
+                    [1, 2],
+                    [8, 1]
+                ),
+                Vector(8, 19)
+            )
+            == Vector(2, 3)
+        )
+        assert(
+            round(
+                solve_matrix_equation(
+                    Matrix(
+                        [4, 6, 2],
+                        [3, 4, 1],
+                        [2, 8, 13]
+                    ),
+                    Vector(9, 7, 2)
+                ),
+                PRECISION
+            )
+            == Vector(3, -1/2, 0)
+        )
+        assert(
+            solve_matrix_equation(
+                Matrix(
+                    [1, 1, 1],
+                    [3, 2, 1],
+                    [2, 1, 2]
+                ),
+                Vector(15, 28, 23)
+            )
+            == Vector(3, 7, 5)
+        )
+
+        print("All solve_matrix_equation tests pass")
+        return True
+    except Exception:
+        print("solve_matrix_equation TEST FAILED!")
+        traceback.print_exc()
+        return False
+
+
 test_is_numeric()
 test_Vector()
+test_Matrix()
+test_solve_matrix_equation()
