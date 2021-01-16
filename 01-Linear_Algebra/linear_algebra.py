@@ -256,13 +256,31 @@ class Matrix():
                 for row in self.matrix
             ])
 
+    def append_right(self, to_append):
+        assert(isinstance(to_append, Vector) or isinstance(to_append, Matrix))
+        if isinstance(to_append, Vector):
+            # Vector length == # rows
+            assert(len(to_append) == self.dimensions()[0])
+            return Matrix([
+                row + [to_append[i]]
+                for i, row in enumerate(self.matrix)
+            ])
+
+        else:  # If Matrix:
+            # Matrices have the same number of rows
+            assert(to_append.dimensions()[0] == self.dimensions()[0])
+            return Matrix([
+                row + to_append[i]
+                for i, row in enumerate(self.matrix)
+            ])
+
     def convert_to_echelon_form(self, verbose=False):
         """
         Convert the matrix to echelon form, for example:
-        [[1, #, #, #],
-         [0, 1, #, #],
-         [0, 0, 1, #],
-         [0, 0, 0, 1]]
+        [[1, #, #, #, ...],
+         [0, 1, #, #, ...],
+         [0, 0, 1, #, ...],
+         [0, 0, 0, 1, ...]]
         """
         num_rows, num_columns = self.dimensions()
         assert(num_rows <= num_columns)
@@ -319,6 +337,65 @@ class Matrix():
 
         return M
 
+    def in_echelon_form(self):
+        num_rows, num_columns = self.dimensions()
+
+        if num_rows > num_columns:
+            return False
+        else:
+            for r in range(num_rows):
+                if self[r][r] != 1:
+                    return False
+
+                if r > 0:
+                    for c in range(r):
+                        if self[r][c] != 0:
+                            return False
+
+        return True
+
+    def reduce_echelon_to_identiy(self, verbose=False):
+        """
+        Convert the matrix from echelon form:
+        [[1, #, #, #, ...],
+         [0, 1, #, #, ...],
+         [0, 0, 1, #, ...],
+         [0, 0, 0, 1, ...]]
+
+        ...to idenity [matrix] form via backward substituion:
+        [[1, 0, 0, 0, ...],
+         [0, 1, 0, 0, ...],
+         [0, 0, 1, 0, ...],
+         [0, 0, 0, 1, ...]]
+        """
+        assert(self.in_echelon_form())
+
+        num_rows, num_columns = self.dimensions()
+
+        # For convenience
+        M = self  # Matrix
+        if verbose:
+            print("Starting matrix:")
+            print(M)
+
+        for c in reversed(range(num_rows)):
+            # For each column in the orignal matrix, up to the number of rows
+            # (in reverse order):
+            if c > 0:  # If not the first column
+                for r in range(c):
+                    if M[r][c] != 0:
+                        M[r] = (Vector(M[r]) - M[r][c] * Vector(M[c])).vector
+
+                if verbose:
+                    print("After reducing column {c}:")
+                    print(M)
+
+        if verbose:
+            print("Final:")
+            print(M)
+
+        return M
+
 def solve_matrix_equation(matrix, vector, verbose=False):
     """
     Solves a linear matrix equation (system of linear equations) of the form
@@ -343,12 +420,8 @@ def solve_matrix_equation(matrix, vector, verbose=False):
     assert(len(vector) == num_rows)
 
     # 1. For ease of computation add `vector` as a column at the end of `matrix`
-    combined_matrix = Matrix([
-        row + [vector[i]]
-        for i, row in enumerate(matrix.matrix)
-    ])
+    combined_matrix = matrix.append_right(vector)
     CM = combined_matrix
-    assert(CM.dimensions()[1] == (num_columns + 1))
 
     if verbose:
         print(CM)
@@ -360,15 +433,7 @@ def solve_matrix_equation(matrix, vector, verbose=False):
         print(CM)
 
     # 3. Solve the matrix by backward substituion
-    for c in reversed(range(num_columns)):
-        # For each column in the orignal matrix in reverse order
-        if c > 0:  # If not the first column
-            for r in range(c):
-                if CM[r][c] != 0:
-                    CM[r] = (Vector(CM[r]) - CM[r][c] * Vector(CM[c])).vector
-
-            if verbose:
-                print(CM)
+    CM = CM.reduce_echelon_to_identiy(verbose)
 
     if verbose:
         print(CM)

@@ -237,11 +237,89 @@ def test_Matrix():
         assert(
             Matrix(
                 [1, 2],
+                [3, 4]
+            ).append_right(Vector(5, 6))
+            == Matrix(
+                [1, 2, 5],
+                [3, 4, 6]
+            )
+        )
+        assert(
+            Matrix(
+                [1, 2],
+                [3, 4]
+            ).append_right(
+                Matrix(
+                    [5, 6],
+                    [7, 8]
+                )
+            )
+            == Matrix(
+                [1, 2, 5, 6],
+                [3, 4, 7, 8]
+            )
+        )
+        assert(
+            Matrix(
+                [1, 2],
                 [8, 1]
             ).convert_to_echelon_form()
             == Matrix(
                 [1, 2],
                 [0, 1]
+            )
+        )
+        assert(
+            Matrix(
+                [1, 2],
+                [8, 1]
+            ).in_echelon_form() is False
+        )
+        assert(
+            Matrix(
+                [1, 2],
+                [0, 1]
+            ).in_echelon_form() is True
+        )
+        assert(
+            Matrix(
+                [1, 2, 3],
+                [0, 1, 4],
+                [0, 0, 1]
+            ).in_echelon_form() is True
+        )
+        assert(
+            Matrix(
+                [1, 2, 3],
+                [0, 1, 4],
+                [0.001, 0, 1]
+            ).in_echelon_form() is False
+        )
+        assert(
+            Matrix(
+                [1, 2],
+                [0, 1],
+                [0, 0]
+            ).in_echelon_form() is False
+        )
+        assert(
+            Matrix(
+                [1, 2],
+                [0, 1]
+            ).reduce_echelon_to_identiy()
+            == Matrix(
+                [1, 0],
+                [0, 1]
+            )
+        )
+        assert(
+            Matrix(
+                [1, 2, 2],
+                [0, 1, 2]
+            ).reduce_echelon_to_identiy()
+            == Matrix(
+                [1, 0, -2],
+                [0, 1, 2]
             )
         )
 
