@@ -1,7 +1,9 @@
 from math import sqrt, pi, cos
 import traceback
 
-from linear_algebra import is_numeric, Vector, Matrix, solve_matrix_equation
+from linear_algebra import (
+    is_numeric, Vector, Matrix, IdentityMatrix, solve_matrix_equation
+)
 
 PRECISION = 10
 
@@ -322,11 +324,51 @@ def test_Matrix():
                 [0, 1, 2]
             )
         )
+        assert(
+            round(
+                Matrix(
+                    [1, 1, 1],
+                    [3, 2, 1],
+                    [2, 1, 2]
+                ).invert(),
+                PRECISION
+            )
+            == Matrix(
+                [-3/2, 1/2, 1/2],
+                [2, 0, -1],
+                [1/2, -1/2, 1/2]
+            )
+        )
 
         print("All Matrix tests pass")
         return True
     except Exception:
         print("Matrix TEST FAILED!")
+        traceback.print_exc()
+        return False
+
+def test_IdentityMatrix():
+    try:
+        assert(
+            IdentityMatrix(2)
+            == Matrix([
+                [1, 0],
+                [0, 1]
+            ])
+        )
+        assert(
+            IdentityMatrix(3)
+            == Matrix([
+                [1, 0, 0],
+                [0, 1, 0],
+                [0, 0, 1]
+            ])
+        )
+
+        print("All IdentityMatrix tests pass")
+        return True
+    except Exception:
+        print("IdentityMatrix TEST FAILED!")
         traceback.print_exc()
         return False
 
@@ -379,4 +421,5 @@ def test_solve_matrix_equation():
 test_is_numeric()
 test_Vector()
 test_Matrix()
+test_IdentityMatrix()
 test_solve_matrix_equation()

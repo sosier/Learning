@@ -396,6 +396,49 @@ class Matrix():
 
         return M
 
+    def invert(self, verbose=False):
+        num_rows, num_columns = self.dimensions()
+        assert(num_rows == num_columns)  # Is square matrix
+
+        # 1. Append the Identity Matrix of the same dimensions as self
+        combined_matrix = self.append_right(IdentityMatrix(num_rows))
+        CM = combined_matrix
+
+        # 2. Reduce the combined matrix to "echelon" form
+        CM = CM.convert_to_echelon_form(verbose)
+
+        # 3. "Solve" the matrix by backward substituion
+        CM = CM.reduce_echelon_to_identiy(verbose)
+
+        # 4. The original Idenity Matrix we appended is now transformed into the
+        #    inverse Matrix
+        return Matrix([
+            row[-num_rows:]
+            for row in CM.matrix
+        ])
+
+def IdentityMatrix(size):
+    """
+    Generate the size rows by size columns Identity Matrix, for example when
+    size = 3:
+    [[1, 0, 0],
+     [0, 1, 0],
+     [0, 0, 1]]
+    """
+    assert(isinstance(size, int) and size >= 1)
+
+    # Initialize square matrix of all zeroes:
+    matrix = Matrix([
+        [0] * size
+        for _ in range(size)
+    ])
+
+    # Set diagonal values to 1:
+    for i in range(size):
+        matrix[i][i] = 1
+
+    return matrix
+
 def solve_matrix_equation(matrix, vector, verbose=False):
     """
     Solves a linear matrix equation (system of linear equations) of the form
