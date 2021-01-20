@@ -188,15 +188,26 @@ class Matrix():
     def __str__(self):
         return "\n".join([str(row) for row in self.matrix]) + "\n"
 
+    @property
+    def num_rows(self):
+        return len(self.matrix)
+
+    @property
+    def num_columns(self):
+        return len(self.matrix[0])
+
     def dimensions(self):
         """
         Return the matrix dimensions (m x n) / (rows x columns) as a tuple:
         (m, n) / (rows, columns)
         """
         return (
-            len(self.matrix),  # Rows
-            len(self.matrix[0])  # Columns
+            self.num_rows,
+            self.num_columns
         )
+
+    def is_square(self):
+        return self.num_rows == self.num_columns
 
     def __eq__(self, other):
         try:
@@ -416,6 +427,30 @@ class Matrix():
             row[-num_rows:]
             for row in CM.matrix
         ])
+
+    def determinant(self):
+        assert(self.is_square())
+        assert(self.num_rows > 0)
+
+        if self.num_rows == 1:
+            return self[0][0]
+        else:
+            # Recurse to get final determinant:
+            return sum([
+                (-1 if c % 2 == 1 else 1)  # 1 if even, -1 if odd
+                * self[0][c]
+                # x Determinant of the submatrix left if you remove the top row
+                # and column `c`:
+                * Matrix([
+                    [
+                        self[r][col]
+                        for col in range(self.num_columns)
+                        if c != col
+                    ]
+                    for r in range(1, self.num_rows)  # Removes top row
+                ]).determinant()
+                for c in range(self.num_columns)
+            ])
 
 def IdentityMatrix(size):
     """

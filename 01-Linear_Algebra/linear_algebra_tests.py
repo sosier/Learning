@@ -173,11 +173,29 @@ def test_Matrix():
             [7, 8, 9]
         ])
 
+        assert(m.num_rows == 3)
+        assert(Matrix([
+                [1, 2, 3],
+                [1, 2, 3]
+            ]).num_rows == 2
+        )
+        assert(m.num_columns == 3)
+        assert(Matrix([
+                [1, 2, 3],
+                [1, 2, 3]
+            ]).num_columns == 3
+        )
         assert(m.dimensions() == (3, 3))
         assert(Matrix([
                 [1, 2, 3],
                 [1, 2, 3]
             ]).dimensions() == (2, 3)
+        )
+        assert(m.is_square() is True)
+        assert(Matrix([
+                [1, 2, 3],
+                [1, 2, 3]
+            ]).is_square() is False
         )
 
         # Check equalities:
@@ -338,6 +356,20 @@ def test_Matrix():
                 [2, 0, -1],
                 [1/2, -1/2, 1/2]
             )
+        )
+        assert(
+            Matrix(
+                [-2, 2, -3],
+                [-1, 1, 3],
+                [2, 0, -1]
+            ).determinant() == 18
+        )
+        assert(
+            Matrix(
+                [-2, 2, -3],
+                [-1, 1, 3],
+                [-2, 2, 6]
+            ).determinant() == 0
         )
 
         print("All Matrix tests pass")
