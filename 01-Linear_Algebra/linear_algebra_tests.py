@@ -197,6 +197,64 @@ def test_Matrix():
                 [1, 2, 3]
             ]).is_square() is False
         )
+        assert(Matrix([
+                [1, 2, 3],
+                [1, 2, 3]
+            ]).transpose()
+            == Matrix([
+                [1, 1],
+                [2, 2],
+                [3, 3]
+            ])
+        )
+        assert(Matrix([
+                [1, 2],
+                [3, 4]
+            ]).transpose()
+            == Matrix([
+                [1, 3],
+                [2, 4]
+            ])
+        )
+        assert(Matrix([
+                [1, 2, 3],
+                [1, 2, 3]
+            ]).T
+            == Matrix([
+                [1, 1],
+                [2, 2],
+                [3, 3]
+            ])
+        )
+        assert(Matrix([
+                [1, 2],
+                [3, 4]
+            ]).T
+            == Matrix([
+                [1, 3],
+                [2, 4]
+            ])
+        )
+        assert(Matrix([
+                [1, 2],
+                [3, 4]
+            ]).is_orthonormal() is False
+        )
+        assert(Matrix([
+                [1, 0],
+                [0, 1]
+            ]).is_orthonormal() is True
+        )
+        assert(Matrix([
+                [1, 0],
+                [0, -1]
+            ]).is_orthonormal() is True
+        )
+        assert(Matrix([
+                [1, -1],
+                [1, 1]
+            ]).is_orthonormal() is False
+        )
 
         # Check equalities:
         assert((m == m) is True)

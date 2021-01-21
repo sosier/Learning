@@ -209,6 +209,34 @@ class Matrix():
     def is_square(self):
         return self.num_rows == self.num_columns
 
+    def transpose(self):
+        return Matrix([
+            [self[r][c] for r in range(self.num_rows)]
+            for c in range(self.num_columns)
+        ])
+
+    @property
+    def T(self):
+        """
+        Alias for Matrix.transpose()
+        """
+        return self.transpose()
+
+    def is_orthonormal(self):
+        column_vectors = self.T.matrix
+        return(
+            all([
+                # All column vectors must be orthogonal to eachother
+                Vector(vector_a).orthogonal_to(Vector(vector_b))
+                for vector_a, vector_b in combinations(column_vectors, 2)
+            ])
+            and all([
+                # All column vectors must be normalized: length (magnitude) = 1
+                Vector(vector).magnitude() == 1
+                for vector in column_vectors
+            ])
+        )
+
     def __eq__(self, other):
         try:
             return (
