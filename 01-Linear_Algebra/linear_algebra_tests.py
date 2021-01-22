@@ -430,6 +430,23 @@ def test_Matrix():
             ).determinant() == 0
         )
 
+        assert(
+            round(
+                Matrix(
+                    [1, 1],
+                    [1, 2]
+                ).to_orthonormal(),
+                PRECISION
+            )
+            == round(
+                Matrix(
+                    [1/sqrt(2), -1/sqrt(2)],
+                    [1/sqrt(2), 1/sqrt(2)]
+                ),
+                PRECISION
+            )
+        )
+
         print("All Matrix tests pass")
         return True
     except Exception:

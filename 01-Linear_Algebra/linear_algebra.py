@@ -480,6 +480,47 @@ class Matrix():
                 for c in range(self.num_columns)
             ])
 
+    def to_orthonormal(self):
+        """
+        Convert the current matrix to be orthonormal using the Gram–Schmidt
+        process
+        """
+        if self.is_orthonormal():
+            return self
+        else:
+            # Column vectors must be linearly independent:
+            assert(self.determinant() != 0)
+
+            column_vectors = [Vector(vector) for vector in self.T.matrix]
+
+            for c, vector in enumerate(column_vectors):
+                if c == 0:
+                    # 1. Normalize the first vector to length 1 (unit length).
+                    #    This will be the first orthonormal basis vector
+                    column_vectors[c] = vector.normalize()
+                else:
+                    # 2. For all subsequent vectors, first reduce that vector to
+                    #    only the orthogonal portion of its direction by
+                    #    subtracting it's vector projections onto each of the
+                    #    orthonormal bases found so far. The remainder after all
+                    #    subtraction are complete will be only the component of
+                    #    that vector orthogonal to all previously calculated
+                    #    basis vectors:
+                    for basis_vector in column_vectors[:c]:
+                        vector =\
+                            vector - vector.vector_projection_onto(basis_vector)
+
+                    # 3. Finally, normalize the now orthogonal vector to be unit
+                    #    length:
+                    column_vectors[c] = vector.normalize()
+
+            # Convert the Vector objects back to lists:
+            column_vectors = [vector.vector for vector in column_vectors]
+
+            # Return the transpose since Matrix accept row vectors as input,
+            # not column vectors:
+            return Matrix(column_vectors).T
+
 def IdentityMatrix(size):
     """
     Generate the size rows by size columns Identity Matrix, for example when
