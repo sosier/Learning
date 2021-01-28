@@ -265,6 +265,16 @@ class Matrix():
             for row in self.matrix
         ])
 
+    def __add__(self, other):
+        assert(isinstance(other, Matrix))
+        return Matrix([
+            [
+                val_self + val_other
+                for val_self, val_other in zip(row_self, row_other)
+            ]
+            for row_self, row_other in zip(self.matrix, other.matrix)
+        ])
+
     def __mul__(self, other):
         """
         Matrix * Matrix & Matrix * Vector multiplication
@@ -294,6 +304,13 @@ class Matrix():
                 ]
                 for row in self.matrix
             ])
+
+    def __rmul__(self, other):
+        assert(is_numeric(other))
+        return Matrix([
+            [other * val for val in row]
+            for row in self.matrix
+        ])
 
     def append_right(self, to_append):
         assert(isinstance(to_append, Vector) or isinstance(to_append, Matrix))
@@ -587,3 +604,45 @@ def solve_matrix_equation(matrix, vector, verbose=False):
 
     # 4. The values in the final, appended column are the solution
     return Vector([row[num_columns] for row in CM.matrix])
+
+def page_rank(link_matrix, d=0.85, max_iterations=None):
+    """
+    link_matrix = Square (n by n) matrix of the transition probabilities from
+        one site to another
+    d = Dampening factor (probability of continuing to "click links" vs.
+        randomly going to a site). Used to make sure algorithm doesn't get
+        stuck, for example, on a site with no outbound links
+    max_iterations = Maximum number of algorithm iterations allowed before a
+        result is returned. If an exact solution is found is less iterations,
+        that solution will be returned and no more iterations will be completed.
+    """
+    assert(isinstance(link_matrix, Matrix))
+    assert(link_matrix.is_square())
+    assert(all(
+        sum(column) == 1
+        for column in link_matrix.T.matrix
+    ))
+    assert( 0 <= d <= 1)
+    assert(max_iterations is None or max_iterations >= 0)
+
+    n = link_matrix.num_rows
+    i = 0
+    # Build link_matrix with dampening
+    LM = (
+        d * link_matrix
+        + ((1 - d) / n) * Matrix([[1] * n] * n)  # * 1's matrix
+    )
+    # Initalize all sites to the same page rank:
+    rank_values = Vector([1] * link_matrix.num_rows) / link_matrix.num_rows
+    last_rank_values = None
+
+    if max_iterations is None or max_iterations > 0:
+        while rank_values != last_rank_values:
+            i += 1
+            last_rank_values = rank_values
+            rank_values = LM * rank_values
+
+            if max_iterations is not None and i >= max_iterations:
+                return rank_values
+
+    return rank_values

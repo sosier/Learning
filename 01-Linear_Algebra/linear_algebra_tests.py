@@ -2,7 +2,7 @@ from math import sqrt, pi, cos
 import traceback
 
 from linear_algebra import (
-    is_numeric, Vector, Matrix, IdentityMatrix, solve_matrix_equation
+    is_numeric, Vector, Matrix, IdentityMatrix, solve_matrix_equation, page_rank
 )
 
 PRECISION = 10
@@ -289,7 +289,61 @@ def test_Matrix():
             ])
         )
 
+        # Addition:
+        assert(
+            (
+                Matrix([
+                    [1, 1],
+                    [1, 1]
+                ])
+                + Matrix([
+                    [1, 1],
+                    [1, 1]
+                ])
+            )
+            == Matrix([
+                [2, 2],
+                [2, 2]
+            ])
+        )
+        assert(
+            (
+                Matrix([
+                    [0, -1],
+                    [-1, 0]
+                ])
+                + Matrix([
+                    [1, 1],
+                    [1, 1]
+                ])
+            )
+            == Matrix([
+                [1, 0],
+                [0, 1]
+            ])
+        )
+
         # Multiplication:
+        assert(
+            2* Matrix([
+                [1, 2],
+                [3, 4]
+            ])
+            == Matrix([
+                [2, 4],
+                [6, 8]
+            ])
+        )
+        assert(
+            0.5 * Matrix([
+                [2, 4],
+                [6, 8]
+            ])
+            == Matrix([
+                [1, 2],
+                [3, 4]
+            ])
+        )
         assert(
             Matrix([
                 [1, 2],
@@ -524,9 +578,60 @@ def test_solve_matrix_equation():
         traceback.print_exc()
         return False
 
+def test_page_rank():
+    try:
+        # assert(
+        assert(
+            round(
+                page_rank(
+                    Matrix([
+                        [0,   1/2, 1/3, 0, 0,   0 ],
+                        [1/3, 0,   0,   0, 1/2, 0 ],
+                        [1/3, 1/2, 0,   1, 0,   1/2 ],
+                        [1/3, 0,   1/3, 0, 1/2, 1/2 ],
+                        [0,   0,   0,   0, 0,   0 ],
+                        [0,   0,   1/3, 0, 0,   0 ]
+                    ]),
+                    d=1
+                ),
+                PRECISION
+            )
+            == round(
+                Vector(16, 5.33333333, 40, 25.33333333, 0, 13.33333333) / 100,
+                PRECISION
+            )
+        )
+        assert(
+            round(
+                page_rank(
+                    Matrix([
+                        [0,   1/2, 1/3, 0, 0,   0 ],
+                        [1/3, 0,   0,   0, 1/2, 0 ],
+                        [1/3, 1/2, 0,   1, 0,   1/2 ],
+                        [1/3, 0,   1/3, 0, 1/2, 1/2 ],
+                        [0,   0,   0,   0, 0,   0 ],
+                        [0,   0,   1/3, 0, 0,   0 ]
+                    ]),
+                    max_iterations=0
+                ),
+                PRECISION
+            )
+            == round(
+                Vector([1/6] * 6),
+                PRECISION
+            )
+        )
+
+        print("All page_rank tests pass")
+        return True
+    except Exception:
+        print("page_rank TEST FAILED!")
+        traceback.print_exc()
+        return False
 
 test_is_numeric()
 test_Vector()
 test_Matrix()
 test_IdentityMatrix()
 test_solve_matrix_equation()
+test_page_rank()
