@@ -1,7 +1,7 @@
 # Learning Plan 2021
 
 - [ ] [Coursera - Mathematics for Machine Learning Specialization](https://www.coursera.org/specializations/mathematics-machine-learning)
-  - [ ] [Linear Algebra](https://www.coursera.org/learn/linear-algebra-machine-learning)
+  - [x] ~[Linear Algebra](https://www.coursera.org/learn/linear-algebra-machine-learning)~
   - [ ] [Multivariate Calculus](https://www.coursera.org/learn/multivariate-calculus-machine-learning)
   - [ ] [PCA](https://www.coursera.org/learn/pca-machine-learning)
 - [ ] [Coursera - Machine Learning (Andrew Ng's)](https://www.coursera.org/learn/machine-learning)
@@ -22,8 +22,10 @@
  2. Machine Learning in General
  3. Deep Learning
  4. Reinforcement Learning
- 
+
  - Specific programming skills / tools at any time as needed
+ - Future ideas for areas of study:
+   - [Forecasting](https://otexts.com/fpp2/)
 
 ## Helpful Links / Sources
  - [Carnegie Melon - BS in AI Cirriculum](https://www.cs.cmu.edu/bs-in-artificial-intelligence/curriculum)

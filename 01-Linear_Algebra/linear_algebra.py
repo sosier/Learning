@@ -538,6 +538,12 @@ class Matrix():
             # not column vectors:
             return Matrix(column_vectors).T
 
+    # Will NOT be implementing code to find eigenvalues / eigenvectors. This is
+    # very complicated to do for a Matrix of arbitrary size. For example:
+    # http://www.cs.unc.edu/techreports/96-043.pdf
+    # def get_eigenvalues_vectors(self):
+    #     pass
+
 def IdentityMatrix(size):
     """
     Generate the size rows by size columns Identity Matrix, for example when
