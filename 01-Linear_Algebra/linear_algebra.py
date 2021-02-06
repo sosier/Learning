@@ -175,7 +175,10 @@ class Matrix():
     def __init__(self, *rows_of_numbers):
         if (len(rows_of_numbers) == 1
                 and type(rows_of_numbers[0]) == list
-                and type(rows_of_numbers[0][0]) == list):
+                and (
+                    len(rows_of_numbers[0]) == 0
+                    or type(rows_of_numbers[0][0]) == list
+                )):
             rows_of_numbers = rows_of_numbers[0]
 
         for row in rows_of_numbers:
