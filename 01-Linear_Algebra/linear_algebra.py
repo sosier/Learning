@@ -55,8 +55,14 @@ class Vector():
         return Vector(*[x - y for x, y in zip(self, other)])
 
     def __mul__(self, other):
-        assert(is_numeric(other))
-        return Vector(*[other * num for num in self.vector])
+        assert(is_numeric(other) or isinstance(other, Vector))
+        if is_numeric(other):
+            return Vector(*[other * num for num in self.vector])
+        else:
+            return Vector(*[
+                x * y
+                for x, y in zip(self.vector, other.vector)
+            ])
 
     def __rmul__(self, other):
         return self.__mul__(other)

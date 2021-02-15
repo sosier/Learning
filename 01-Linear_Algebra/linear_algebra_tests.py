@@ -48,6 +48,7 @@ def test_Vector():
         assert((3 * v) == Vector(3, 6, 6))
         assert((v * 3) == Vector(3, 6, 6))
         assert((v / 3) == Vector(1/3, 2/3, 2/3))
+        assert((v * v) == Vector(1, 4, 4))
 
         # Vector magnitudes & dot products:
         assert(Vector(3, 4).magnitude() == 5)
