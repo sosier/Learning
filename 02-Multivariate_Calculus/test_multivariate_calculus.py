@@ -12,7 +12,7 @@ from multivariate_calculus import (
     SimpleLayer, derivative_of_SimpleLayer_Z,
     SimpleNeuralNetwork,
     mean_squared_error, derivative_of_mean_squared_error,
-    get_backprop_SimpleNeuralNetwork_jacobians
+    get_backprop_SimpleNeuralNetwork_jacobians, train_SimpleNeuralNetwork
 )
 
 def test_is_vector():
@@ -514,3 +514,43 @@ def test_get_backprop_SimpleNeuralNetwork_jacobians():
             Y=np.array([[5], [6]])
         )[2].shape == (6, 1)
     )
+
+def test_train_SimpleNeuralNetwork():
+    # For speed of training / testing using a very simple function to generate
+    # the data. Again for speed it will only return positive valued X's and Y's:
+    def _generate_training_data(n):
+        def get_y(row):
+            return 3 * row[0] +  2 * row[1] + 1
+
+        # For speed of training / testing only including positive values in X.
+        # Given the relu activation function negatives could slow or prevent the
+        # network from learning:
+        X = np.random.random((n, 2)) * 10  # Random #'s between 0 and 10
+        Y = np.expand_dims(np.apply_along_axis(get_y, axis=1, arr=X), axis=1)
+        return X, Y
+
+    # For speed of training / testing using a super small network:
+    NN = SimpleNeuralNetwork(
+        SimpleLayer(input_size=2, output_size=1)
+    )
+    X, Y = _generate_training_data(1)
+    Wb = NN(X, return_all_internals=True)[0]["Wb"]
+
+    # For optimal learning, don't allow any negative weights / biases, given the
+    # very small network and the relu activation function, the network may not
+    # learn at all (or learn much slower) if weights are randomly initialized as
+    # negative:
+    while any(Wb < 0):
+        NN = SimpleNeuralNetwork(
+            SimpleLayer(input_size=2, output_size=1)
+        )
+        X, Y = _generate_training_data(1)
+        Wb = NN(X, return_all_internals=True)[0]["Wb"]
+
+    for i in range(1000):
+        X, Y = _generate_training_data(8)
+        NN = train_SimpleNeuralNetwork(NN, X, Y, learning_rate=0.0001)
+
+    X, Y = _generate_training_data(256)
+    # For speed of testing this is not a particularly amazing errror:
+    assert(np.mean(mean_squared_error(NN(X), Y)) < 0.5)

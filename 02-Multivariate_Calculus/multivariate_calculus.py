@@ -157,8 +157,9 @@ def mean_squared_error(predicted, actual):
     squared_error = error * error
     return np.expand_dims(  # Matrix
         # Summing all columns for each row and dividing by the number of columns
-        np.sum(squared_error, axis=1) / squared_error.shape[1]
-    , axis=1)
+        np.sum(squared_error, axis=1) / squared_error.shape[1],
+        axis=1
+    )
 
 def derivative_of_mean_squared_error(predicted, actual):
     assert(predicted.shape == actual.shape)
@@ -229,3 +230,22 @@ def get_backprop_SimpleNeuralNetwork_jacobians(NN, X, Y):
     # Return jacobians in reverse order so that the first layer is first and the
     # final layer is last again:
     return jacobians[::-1]
+
+def train_SimpleNeuralNetwork(NN, X, Y, learning_rate=0.001):
+    """
+    NN = SimpleNeuralNetwork
+    X = input matrix (where each row is a training example, and each column is a
+        feature)
+    Y = output / actuals matrix (where each row is a training example)
+    """
+    all_internals = NN(X, return_all_internals=True)
+
+    jacobians = get_backprop_SimpleNeuralNetwork_jacobians(NN, X, Y)
+    jacobians = [learning_rate * J for J in jacobians]
+
+    updated_Wb = [layer["Wb"] - J for layer, J in zip(all_internals, jacobians)]
+
+    return SimpleNeuralNetwork([
+        SimpleLayer(Wb=Wb)
+        for Wb in updated_Wb
+    ])
