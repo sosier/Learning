@@ -12,7 +12,8 @@ from multivariate_calculus import (
     SimpleLayer, derivative_of_SimpleLayer_Z,
     SimpleNeuralNetwork,
     mean_squared_error, derivative_of_mean_squared_error,
-    get_backprop_SimpleNeuralNetwork_jacobians, train_SimpleNeuralNetwork
+    get_backprop_SimpleNeuralNetwork_jacobians, train_SimpleNeuralNetwork,
+    find_root_Newton_Raphson
 )
 
 def test_is_vector():
@@ -516,6 +517,8 @@ def test_get_backprop_SimpleNeuralNetwork_jacobians():
     )
 
 def test_train_SimpleNeuralNetwork():
+    np.random.seed(1234)
+
     # For speed of training / testing using a very simple function to generate
     # the data. Again for speed it will only return positive valued X's and Y's:
     def _generate_training_data(n):
@@ -554,3 +557,28 @@ def test_train_SimpleNeuralNetwork():
     X, Y = _generate_training_data(256)
     # For speed of testing this is not a particularly amazing errror:
     assert(np.mean(mean_squared_error(NN(X), Y)) < 0.5)
+
+def test_find_root_Newton_Raphson():
+    def f(x):
+        return x**6/6 - 3*x**4 - 2*x**3/3 + 27*x**2/2 + 18*x - 30
+
+    def f_prime(x):
+        return x**5 - 12*x**3 - 2*x**2 + 27*x + 18
+
+    assert(
+        find_root_Newton_Raphson(f, f_prime, starting_x=3.1)
+        == -3.7602139721974477
+    )
+    assert(
+        find_root_Newton_Raphson(f, f_prime, starting_x=-4)
+        == -3.7602139721974477
+    )
+    assert(
+        find_root_Newton_Raphson(f, f_prime, starting_x=4)
+        == 1.063070629709697
+    )
+    np.random.seed(1234)
+    assert(
+        find_root_Newton_Raphson(f, f_prime)
+        == -3.7602139721974477
+    )

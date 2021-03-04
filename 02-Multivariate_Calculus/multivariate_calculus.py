@@ -249,3 +249,30 @@ def train_SimpleNeuralNetwork(NN, X, Y, learning_rate=0.001):
         SimpleLayer(Wb=Wb)
         for Wb in updated_Wb
     ])
+
+def find_root_Newton_Raphson(singe_variable_function, function_derivative,
+                             starting_x=None, max_iterations=100):
+    assert(callable(singe_variable_function))
+    assert(callable(function_derivative))
+    assert(max_iterations >= 0)
+
+    # Starting values:
+    if starting_x is None:
+        x = np.random.random() * 20 - 10  # Random # between -10 & 10
+    else:
+        x = starting_x
+
+    y = singe_variable_function(x)
+    i = 0
+
+    while i <= max_iterations:
+        new_x = x - y / function_derivative(x)
+        y = singe_variable_function(new_x)
+        i += 1
+
+        if y == 0 or x == new_x:
+            return new_x
+        else:
+            x = new_x
+
+    return np.nan
