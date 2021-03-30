@@ -59,3 +59,37 @@ def correlation(*args):
     standard_devs = np.expand_dims(standard_deviation(*args), axis=1)
 
     return covariance_matrix / (standard_devs @ standard_devs.T)
+
+def define_inner_product(matrix="dot"):
+    if type(matrix) == str and matrix == "dot":
+        return np.dot
+
+    def inner_product(vector_x, vector_y):
+        x = np.expand_dims(vector_x, axis=1) if vector_x.ndim else vector_x
+        y = np.expand_dims(vector_y, axis=1) if vector_y.ndim else vector_y
+
+        return x.T @ matrix @ y
+
+    return inner_product
+
+def vector_length(vector, inner_product):
+    return np.sqrt(inner_product(vector, vector))
+
+def vector_distance(vector_x, vector_y, inner_product):
+    return vector_length(vector_x - vector_y, inner_product)
+
+def vector_angle(vector_x, vector_y, inner_product, degrees=True):
+    cosine_of_angle = (
+        inner_product(vector_x, vector_y)
+        / (
+            vector_length(vector_x, inner_product)
+            * vector_length(vector_y, inner_product)
+        )
+    )
+
+    angle = np.arccos(cosine_of_angle)
+
+    if degrees:
+        return angle / (2 * np.pi) * 360
+    else:
+        return angle

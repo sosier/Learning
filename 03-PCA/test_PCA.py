@@ -5,7 +5,10 @@ To test run `pytest` in the command line
 """
 import numpy as np
 
-from PCA import mean, variance, standard_deviation, covariance, correlation
+from PCA import (
+    mean, variance, standard_deviation, covariance, correlation,
+    define_inner_product, vector_length, vector_distance, vector_angle
+)
 
 def test_mean():
     assert(mean(1, 2, 3) == 2)
@@ -184,3 +187,188 @@ def test_correlation():
             [-0.9575, 1]
         ])
     ))
+
+def test_define_inner_product():
+    assert(callable(define_inner_product()))
+    assert(callable(define_inner_product("dot")))
+    assert(callable(define_inner_product(np.array([[1, -1/2],
+                                                   [-1/2, 1]]))))
+def test_inner_product():
+    IP = define_inner_product()
+    assert(
+        IP(np.array([1, 2]),
+           np.array([1, 2]))
+        == 5
+    )
+    assert(
+        IP(np.array([1, 2]),
+           np.array([2, 2]))
+        == 6
+    )
+
+    IP = define_inner_product("dot")
+    assert(
+        IP(np.array([1, 2]),
+           np.array([1, 2]))
+        == 5
+    )
+
+    IP = define_inner_product(np.array([[2, 1, 0],
+                                        [1, 2, -1],
+                                        [0, -1, 2]]))
+    assert(
+        IP(np.array([1, -1, 3]),
+           np.array([1, -1, 3]))
+        == 26
+    )
+    assert(
+        IP(np.array([1/2, -2, -1/2]),
+           np.array([1/2, -2, -1/2]))
+        == 5
+    )
+    assert(
+        IP(np.array([4, 1, 1]),
+           np.array([4, 1, 1]))
+        == 42
+    )
+
+    IP = define_inner_product(np.array([[5/2, -1/2],
+                                        [-1/2, 5/2]]))
+    assert(
+        IP(np.array([-1, 1]),
+           np.array([-1, 1]))
+        == 6
+    )
+
+def test_vector_length():
+    IP = define_inner_product()
+    assert(
+        vector_length(np.array([1, 2]), IP)
+        == np.sqrt(5)
+    )
+
+    IP = define_inner_product(np.array([[2, 1, 0],
+                                        [1, 2, -1],
+                                        [0, -1, 2]]))
+    assert(
+        vector_length(np.array([1, -1, 3]), IP)
+        == np.sqrt(26)
+    )
+    assert(
+        vector_length(np.array([1/2, -2, -1/2]), IP)
+        == np.sqrt(5)
+    )
+    assert(
+        vector_length(np.array([4, 1, 1]), IP)
+        == np.sqrt(42)
+    )
+
+    IP = define_inner_product(np.array([[5/2, -1/2],
+                                        [-1/2, 5/2]]))
+    assert(
+        vector_length(np.array([-1, 1]), IP)
+        == np.sqrt(6)
+    )
+
+def test_vector_distance():
+    IP = define_inner_product()
+    assert(
+        vector_distance(
+            np.array([0, 4]),
+            np.array([-1, 2]),
+            IP
+        ) == np.sqrt(5)
+    )
+
+    IP = define_inner_product(np.array([[2, 1, 0],
+                                        [1, 2, -1],
+                                        [0, -1, 2]]))
+    assert(
+        vector_distance(
+            np.array([0, 4, 34]),
+            np.array([-1, 5, 31]),
+            IP
+        ) == np.sqrt(26)
+    )
+    assert(
+        vector_distance(
+            np.array([0, 4, 3]),
+            np.array([-1/2, 6, 3.5]),
+            IP
+        ) == np.sqrt(5)
+    )
+    assert(
+        vector_distance(
+            np.array([1, 11, 3.2]),
+            np.array([-3, 10, 2.2]),
+            IP
+        ) == np.sqrt(42)
+    )
+
+    IP = define_inner_product(np.array([[5/2, -1/2],
+                                        [-1/2, 5/2]]))
+    assert(
+        vector_distance(
+            np.array([23, 3]),
+            np.array([24, 2]),
+            IP
+        ) == np.sqrt(6)
+    )
+
+def test_vector_angle():
+    IP = define_inner_product()
+    assert(
+        vector_angle(
+            np.array([0, 4]),
+            np.array([-1, 0]),
+            IP
+        ) == 90
+    )
+    assert(
+        vector_angle(
+            np.array([0, 4]),
+            np.array([-1, 0]),
+            IP,
+            degrees=False
+        ) == np.pi / 2
+    )
+    assert(np.isclose(
+        vector_angle(
+            np.array([0, 4]),
+            np.array([1, 1]),
+            IP
+        ),
+        45
+    ))
+    assert(np.isclose(
+        vector_angle(
+            np.array([0, 4]),
+            np.array([1, 1]),
+            IP,
+            degrees=False
+        ),
+        np.pi / 4
+    ))
+
+    IP = define_inner_product(np.array([[2, 0],
+                                        [0, 1]]))
+    assert(
+        vector_angle(
+            np.array([1, 1]),
+            np.array([-1, 1]),
+            IP,
+            degrees=False
+        ) == np.arccos(-1/3)
+    )
+
+    IP = define_inner_product(np.array([[1, 0, 0],
+                                        [0, 2, 0],
+                                        [0, 0, 3]]))
+    assert(
+        vector_angle(
+            np.array([2, 1, -4]),
+            np.array([1, -1, 3]),
+            IP,
+            degrees=False
+        ) == np.arccos(-2/np.sqrt(5))
+    )
