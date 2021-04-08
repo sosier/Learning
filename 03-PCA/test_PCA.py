@@ -7,7 +7,8 @@ import numpy as np
 
 from PCA import (
     mean, variance, standard_deviation, covariance, correlation,
-    define_inner_product, vector_length, vector_distance, vector_angle
+    define_inner_product, vector_length, vector_distance, vector_angle,
+    project_vector_onto_subspace
 )
 
 def test_mean():
@@ -205,6 +206,20 @@ def test_inner_product():
            np.array([2, 2]))
         == 6
     )
+    assert(
+        IP(np.array([[1],
+                     [2]]),
+           np.array([[1],
+                     [2]]))
+        == 5
+    )
+    assert(
+        IP(np.array([[1],
+                     [2]]),
+           np.array([[2],
+                     [2]]))
+        == 6
+    )
 
     IP = define_inner_product("dot")
     assert(
@@ -237,6 +252,13 @@ def test_inner_product():
     assert(
         IP(np.array([-1, 1]),
            np.array([-1, 1]))
+        == 6
+    )
+    assert(
+        IP(np.array([[-1],
+                     [1]]),
+           np.array([[-1],
+                     [1]]))
         == 6
     )
 
@@ -372,3 +394,51 @@ def test_vector_angle():
             degrees=False
         ) == np.arccos(-2/np.sqrt(5))
     )
+
+def test_project_vector_onto_subspace():
+    assert(np.array_equal(
+        np.round(
+            project_vector_onto_subspace(
+                np.array([6, 0, 0]),
+                np.array([
+                    [1, 0],
+                    [1, 1],
+                    [1, 2]
+                ])
+            ),
+            4
+        ),
+        np.array([5., 2., -1.])
+    ))
+    assert(np.array_equal(
+        project_vector_onto_subspace(
+            np.array([3, 2, 2]),
+            np.array([
+                [1, 0],
+                [0, 1],
+                [0, 1]
+            ])
+        ),
+        np.array([3, 2, 2])
+    ))
+    assert(np.array_equal(
+        np.round(
+            project_vector_onto_subspace(
+                project_vector_onto_subspace(
+                    np.array([12, 0, 0]),
+                    np.array([
+                        [1, 0],
+                        [1, 1],
+                        [1, 2]
+                    ])
+                ),
+                np.array([
+                    [-10 * np.sqrt(6)],
+                    [-4 * np.sqrt(6)],
+                    [2 * np.sqrt(6)]
+                ])
+            ),
+            4
+        ),
+        np.array([10, 4, -2])
+    ))

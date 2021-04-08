@@ -62,13 +62,17 @@ def correlation(*args):
 
 def define_inner_product(matrix="dot"):
     if type(matrix) == str and matrix == "dot":
-        return np.dot
+        def inner_product(vector_x, vector_y):
+            x = np.squeeze(vector_x) if vector_x.ndim >= 2 else vector_x
+            y = np.squeeze(vector_y) if vector_y.ndim >= 2 else vector_y
+            return np.dot(x, y)
 
-    def inner_product(vector_x, vector_y):
-        x = np.expand_dims(vector_x, axis=1) if vector_x.ndim else vector_x
-        y = np.expand_dims(vector_y, axis=1) if vector_y.ndim else vector_y
+    else:
+        def inner_product(vector_x, vector_y):
+            x = np.expand_dims(vector_x, axis=1) if vector_x.ndim == 1 else vector_x
+            y = np.expand_dims(vector_y, axis=1) if vector_y.ndim == 1 else vector_y
 
-        return x.T @ matrix @ y
+            return x.T @ matrix @ y
 
     return inner_product
 
@@ -93,3 +97,21 @@ def vector_angle(vector_x, vector_y, inner_product, degrees=True):
         return angle / (2 * np.pi) * 360
     else:
         return angle
+
+def project_vector_onto_subspace(vector, subspace_bases_matrix):
+    """
+    Assumes inner product = the dot product
+    """
+    B = subspace_bases_matrix  # Columns = The bases
+    B = np.expand_dims(B, axis=1) if B.ndim == 1 else B
+
+    projection_matrix = B @ np.linalg.inv(B.T @ B) @ B.T
+
+    return projection_matrix @ vector
+
+# x = np.array([[1, 2, 3]])
+# print(x)
+# print(x.ndim)
+# x = np.expand_dims(x, axis=1)
+# print(x)
+# print(x.ndim)
