@@ -4,12 +4,15 @@ Test PCA.py
 To test run `pytest` in the command line
 """
 import numpy as np
+from sklearn.decomposition import PCA as sklearn_PCA
 
 from PCA import (
     mean, variance, standard_deviation, covariance, correlation,
     define_inner_product, vector_length, vector_distance, vector_angle,
-    project_vector_onto_subspace
+    project_vector_onto_subspace, PCA
 )
+
+PRECISION = 10
 
 def test_mean():
     assert(mean(1, 2, 3) == 2)
@@ -442,3 +445,84 @@ def test_project_vector_onto_subspace():
         ),
         np.array([10, 4, -2])
     ))
+
+def test_PCA():
+    X = np.array([
+        [1, 2, 3],
+        [3, -2, 1],
+        [12, 34, 56]
+    ])
+    np.testing.assert_allclose(
+        # Have to check that absolute values are approximately equal b/c
+        # sklearn_PCA can use negative eigenvalues, leading to identical
+        # principle components, but in the opposite direction
+        np.abs(PCA(X, n_components=2)),
+        np.abs(sklearn_PCA(2).fit_transform(X))
+    )
+    # Because we have to test using absolute values above, confirm that both our
+    # PCA and sklearn_PCA are centered (i.e. all columns have mean = 0)
+    assert(
+        round(np.sum(np.sum(PCA(X, n_components=2), axis=0)), PRECISION)
+        == 0
+    )
+    assert(
+        round(np.sum(np.sum(sklearn_PCA(2).fit_transform(X), axis=0)), PRECISION)
+        == 0
+    )
+
+    np.testing.assert_allclose(
+        # Have to check that absolute values are approximately equal b/c
+        # sklearn_PCA can use negative eigenvalues, leading to identical
+        # principle components, but in the opposite direction
+        np.abs(PCA(X, n_components=1)),
+        np.abs(sklearn_PCA(1).fit_transform(X))
+    )
+    # Because we have to test using absolute values above, confirm that both our
+    # PCA and sklearn_PCA are centered (i.e. all columns have mean = 0)
+    assert(
+        round(np.sum(np.sum(PCA(X, n_components=1), axis=0)), PRECISION)
+        == 0
+    )
+    assert(
+        round(np.sum(np.sum(sklearn_PCA(1).fit_transform(X), axis=0)), PRECISION)
+        == 0
+    )
+
+    np.testing.assert_allclose(
+        # Have to check that absolute values are approximately equal b/c
+        # sklearn_PCA can use negative eigenvalues, leading to identical
+        # principle components, but in the opposite direction
+        np.abs(PCA(X, n_components=3)),
+        np.abs(sklearn_PCA(3).fit_transform(X)),
+        atol=1e-10
+    )
+    # Because we have to test using absolute values above, confirm that both our
+    # PCA and sklearn_PCA are centered (i.e. all columns have mean = 0)
+    assert(
+        round(np.sum(np.sum(PCA(X, n_components=3), axis=0)), PRECISION)
+        == 0
+    )
+    assert(
+        round(np.sum(np.sum(sklearn_PCA(3).fit_transform(X), axis=0)), PRECISION)
+        == 0
+    )
+
+    X = np.random.rand(24, 8)
+    np.testing.assert_allclose(
+        # Have to check that absolute values are approximately equal b/c
+        # sklearn_PCA can use negative eigenvalues, leading to identical
+        # principle components, but in the opposite direction
+        np.abs(PCA(X, n_components=5)),
+        np.abs(sklearn_PCA(5).fit_transform(X)),
+        atol=1e-10
+    )
+    # Because we have to test using absolute values above, confirm that both our
+    # PCA and sklearn_PCA are centered (i.e. all columns have mean = 0)
+    assert(
+        round(np.sum(np.sum(PCA(X, n_components=5), axis=0)), PRECISION)
+        == 0
+    )
+    assert(
+        round(np.sum(np.sum(sklearn_PCA(5).fit_transform(X), axis=0)), PRECISION)
+        == 0
+    )

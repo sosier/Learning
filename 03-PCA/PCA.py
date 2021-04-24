@@ -109,6 +109,37 @@ def project_vector_onto_subspace(vector, subspace_bases_matrix):
 
     return projection_matrix @ vector
 
+def PCA(data, n_components):
+    """
+    data = Matrix (N x D) with rows as observations and columns as features
+    new_dimensions
+    """
+    N, D = data.shape
+    assert(n_components <= D)
+
+    # 1. Center the data (convert features to having mean 0)
+    means = np.mean(data, axis=0)
+    centered_data = data - means
+
+    # 2. Calculate data covariance_matrix
+    covariance_matrix = (centered_data.T @ centered_data) / N
+
+    # 3. Calculate eigen- values / vectors of the covariance matrix
+    eigenvalues, eigenvectors = np.linalg.eig(covariance_matrix)
+
+    # 4. Order these from largest to smallest, and select the largest
+    #    `new_dimensions` number of vectors. These are the principle components
+    sort_order = np.argsort(eigenvalues)[::-1]
+    eigenvalues = eigenvalues[sort_order]
+    eigenvectors = eigenvectors[:, sort_order]
+    eigenvalues = eigenvalues[:n_components]
+    eigenvectors = eigenvectors[:, :n_components]
+
+    # print(eigenvalues)
+
+    # 5. Project the centered data onto the principle components
+    return centered_data @ eigenvectors
+
 # x = np.array([[1, 2, 3]])
 # print(x)
 # print(x.ndim)
