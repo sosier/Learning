@@ -1,9 +1,9 @@
 # Learning Plan 2021
 
-- [ ] [Coursera - Mathematics for Machine Learning Specialization](https://www.coursera.org/specializations/mathematics-machine-learning)
+- [x] ~[Coursera - Mathematics for Machine Learning Specialization](https://www.coursera.org/specializations/mathematics-machine-learning)~
   - [x] ~[Linear Algebra](https://www.coursera.org/learn/linear-algebra-machine-learning)~
   - [x] ~[Multivariate Calculus](https://www.coursera.org/learn/multivariate-calculus-machine-learning)~
-  - [ ] [PCA](https://www.coursera.org/learn/pca-machine-learning)
+  - [x] ~[PCA](https://www.coursera.org/learn/pca-machine-learning)~
 - [ ] [Coursera - Machine Learning (Andrew Ng's)](https://www.coursera.org/learn/machine-learning)
 - [ ] [Coursera - Deep Learning Specialization (Andrew Ng's)](https://www.coursera.org/specializations/deep-learning)
 - [ ] [Coursera - Reinforcement Learning Specialization](https://www.coursera.org/specializations/reinforcement-learning)
