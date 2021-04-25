@@ -1,11 +1,12 @@
 # Learning Plan 2021
 
-- [x] ~[Coursera - Mathematics for Machine Learning Specialization](https://www.coursera.org/specializations/mathematics-machine-learning)~
+- [x] ~[Coursera - Mathematics for Machine Learning Specialization (University College London)](https://www.coursera.org/specializations/mathematics-machine-learning)~
   - [x] ~[Linear Algebra](https://www.coursera.org/learn/linear-algebra-machine-learning)~
   - [x] ~[Multivariate Calculus](https://www.coursera.org/learn/multivariate-calculus-machine-learning)~
   - [x] ~[PCA](https://www.coursera.org/learn/pca-machine-learning)~
-- [ ] [Coursera - Machine Learning (Andrew Ng's)](https://www.coursera.org/learn/machine-learning)
-- [ ] [Coursera - Deep Learning Specialization (Andrew Ng's)](https://www.coursera.org/specializations/deep-learning)
+- [ ] [YouTube - Statistics 110: Probability (Harvard)](https://www.youtube.com/playlist?list=PL2SOU6wwxB0uwwH80KTQ6ht66KWxbzTIo)
+- [ ] [Coursera - Machine Learning (Stanford / Andrew Ng)](https://www.coursera.org/learn/machine-learning)
+- [ ] [Coursera - Deep Learning Specialization (Andrew Ng)](https://www.coursera.org/specializations/deep-learning)
 - [ ] [Coursera - Reinforcement Learning Specialization](https://www.coursera.org/specializations/reinforcement-learning)
 
 ## Guiding Principals
