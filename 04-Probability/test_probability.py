@@ -3,9 +3,11 @@ Test probability.py
 
 To test run `pytest` in the command line
 """
+import numpy as np
+
 from probability import (
     multiply_range, factorial, naive_probability, n_choose_k,
-    num_sample_possibilities
+    num_sample_possibilities, simulate_birthday_problem
 )
 
 def test_multiply_range():
@@ -94,3 +96,11 @@ def test_num_sample_possibilities():
             n=2, k=0, with_replacement=False, order_matters=False
         ) == 1
     )
+
+def test_simulate_birthday_problem():
+    np.random.seed(12345)
+    # Assert estimated probability is within 1% of 50%
+    assert(abs(simulate_birthday_problem(23) - 0.50) < 0.01)
+
+    # Assert estimated probability is within 0.1% of 99.9%:
+    assert(abs(simulate_birthday_problem(70) - 0.999) < 0.001)

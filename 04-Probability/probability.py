@@ -1,3 +1,5 @@
+import numpy as np
+
 def multiply_range(from_:int, to:int):
     product = 1
 
@@ -52,3 +54,14 @@ def num_sample_possibilities(
         return factorial(n) / factorial(n - k)
     elif not with_replacement and not order_matters:
         return n_choose_k(n, k)
+
+def simulate_birthday_problem(num_people, num_simulations=1000):
+    results = np.array([])
+    for _ in range(num_simulations):
+        birthdays = np.random.choice(365, size=num_people)
+        birthday_counts = np.unique(birthdays, return_counts=True)[-1]
+        results = np.append(results, any(birthday_counts > 1))
+
+    return np.mean(results)
+
+print(simulate_birthday_problem(23))
