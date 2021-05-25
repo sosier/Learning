@@ -7,7 +7,8 @@ import numpy as np
 
 from probability import (
     multiply_range, factorial, naive_probability, n_choose_k,
-    num_sample_possibilities, simulate_birthday_problem
+    num_sample_possibilities, simulate_birthday_problem,
+    probability_two_aces_info_comparison
 )
 
 def test_multiply_range():
@@ -104,3 +105,12 @@ def test_simulate_birthday_problem():
 
     # Assert estimated probability is within 0.1% of 99.9%:
     assert(abs(simulate_birthday_problem(70) - 0.999) < 0.001)
+
+def test_probability_two_aces_info_comparison():
+    assert(
+        probability_two_aces_info_comparison()
+        == {
+            "prob_two_aces_given_one_ace": 1/33,
+            "prob_two_aces_given_ace_of_spades": 1/17
+        }
+    )

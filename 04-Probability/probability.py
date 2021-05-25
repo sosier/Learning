@@ -64,4 +64,48 @@ def simulate_birthday_problem(num_people, num_simulations=1000):
 
     return np.mean(results)
 
-print(simulate_birthday_problem(23))
+def probability_two_aces_info_comparison():
+    # 1. Let the deck be an array length 52
+    # 2. Let the first 4 cards be the Aces (i = 0 to 3), with the very first
+    #    card (i = 0) being the Ace of Spades
+    # 3. Let all possible two card hands be defined by the 52 x 52 matrix
+    #    where the first card dealt is the rows and the second the columns
+    all_hands = np.ones((52, 52))  # Where 1 = Valid Hand
+    for i in range(52):
+        # Diagonal (same card twice) is impossible and so must be zeroed out:
+        all_hands[i][i] = 0
+
+    # First, what's the probability of a hand with 2 Aces
+    # GIVEN the hand has at least one Ace
+    hands_with_one_ace = all_hands.copy()
+    hands_with_one_ace[4:, 4:] = 0  # These hands have NO Aces
+    num_hands_with_one_ace = hands_with_one_ace.sum()
+
+    hands_with_two_aces = hands_with_one_ace.copy()
+    hands_with_two_aces[4:] = 0  # Zero if first card NOT Ace
+    hands_with_two_aces[:, 4:] = 0  # Zero if second card NOT Ace
+    num_hands_with_two_aces = hands_with_two_aces.sum()
+
+    prob_two_aces_given_one_ace = (
+        num_hands_with_two_aces / num_hands_with_one_ace  # Will be 1/33
+    )
+
+    # Second compare to the probability of a hand with 2 Aces
+    # GIVEN one of the cards is the Ace of Spades (card i = 0)
+    hands_with_ace_of_spades = all_hands.copy()
+    hands_with_ace_of_spades[1:, 1:] = 0  # These hands have NO Ace of Spades
+    num_hands_with_ace_of_spades = hands_with_ace_of_spades.sum()
+
+    hands_with_two_aces = hands_with_ace_of_spades.copy()
+    hands_with_two_aces[4:] = 0  # Zero if first card NOT Ace
+    hands_with_two_aces[:, 4:] = 0  # Zero if second card NOT Ace
+    num_hands_with_two_aces = hands_with_two_aces.sum()
+
+    prob_two_aces_given_ace_of_spades = (
+        num_hands_with_two_aces / num_hands_with_ace_of_spades  # Will be 1/17
+    )
+
+    return {
+        "prob_two_aces_given_one_ace": prob_two_aces_given_one_ace,
+        "prob_two_aces_given_ace_of_spades": prob_two_aces_given_ace_of_spades
+    }
