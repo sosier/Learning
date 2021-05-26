@@ -109,3 +109,47 @@ def probability_two_aces_info_comparison():
         "prob_two_aces_given_one_ace": prob_two_aces_given_one_ace,
         "prob_two_aces_given_ace_of_spades": prob_two_aces_given_ace_of_spades
     }
+
+def simulate_probability_has_disease_given_positive_medical_test(
+        disease_prevalence=0.01, test_accuracy=0.95, num_simulations=1000
+    ):
+    has_disease = (
+        np.random.rand(num_simulations) <= disease_prevalence
+    ).astype(int)
+    test_accurate = (
+        np.random.rand(num_simulations) <= test_accuracy
+    ).astype(int)
+
+    # Pull out positive tests:
+    num_has_disease_and_test_accurate = (
+        has_disease & test_accurate
+    ).astype(int).sum()
+    num_no_disease_and_test_inaccurate = (
+        (has_disease == 0) & (test_accurate == 0)
+    ).astype(int).sum()
+
+    return (
+        num_has_disease_and_test_accurate
+        /
+        (num_has_disease_and_test_accurate + num_no_disease_and_test_inaccurate)
+    )
+
+def simulate_monty_hall_problem(num_simulations=1000):
+    """
+    Returns: Probability of winning if you switch
+    """
+    results = []
+    for _ in range(num_simulations):
+        doors = np.arange(3)
+        door_with_car = np.random.choice(doors)
+        door_you_picked = np.random.choice(doors)
+
+        doors_you_didnt_pick = np.delete(doors, door_you_picked)
+        doors_monty_can_open = np.delete(doors, [door_you_picked, door_with_car])
+        door_monty_opens = np.random.choice(doors_monty_can_open)
+
+        door_you_can_switch_to = np.delete(doors, [door_you_picked, door_monty_opens])[0]
+        result_of_switching = int(door_you_can_switch_to == door_with_car)
+        results.append(result_of_switching)
+
+    return np.mean(results)

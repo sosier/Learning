@@ -8,7 +8,9 @@ import numpy as np
 from probability import (
     multiply_range, factorial, naive_probability, n_choose_k,
     num_sample_possibilities, simulate_birthday_problem,
-    probability_two_aces_info_comparison
+    probability_two_aces_info_comparison,
+    simulate_probability_has_disease_given_positive_medical_test,
+    simulate_monty_hall_problem
 )
 
 def test_multiply_range():
@@ -114,3 +116,19 @@ def test_probability_two_aces_info_comparison():
             "prob_two_aces_given_ace_of_spades": 1/17
         }
     )
+
+def test_simulate_probability_has_disease_given_positive_medical_test():
+    np.random.seed(12345)
+    # Assert estimated probability is within 0.5% of 16%
+    assert(
+        abs(
+            simulate_probability_has_disease_given_positive_medical_test(
+                num_simulations=100000
+            ) - 0.16
+        ) < 0.005
+    )
+
+def test_simulate_monty_hall_problem():
+    np.random.seed(12345)
+    # Assert estimated probability is within 1% of 66.666...%
+    assert(abs(simulate_monty_hall_problem(num_simulations=10000) - 2/3) < 0.02)
