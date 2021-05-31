@@ -153,3 +153,55 @@ def simulate_monty_hall_problem(num_simulations=1000):
         results.append(result_of_switching)
 
     return np.mean(results)
+
+class Bernoulli():
+    def __init__(self, p):
+        """
+        p = Probability of 1
+        1 - p = q = Probability of 0
+        """
+        assert(0 <= p <= 1)
+        self.p = p
+        self.q = 1 - self.p
+
+    def sample(self, n=1):
+        assert(n >= 1)
+        result = (np.random.rand(n) <= self.p).astype(int)
+        return result if n > 1 else result[0]
+
+    def prob_of(self, k):
+        if k not in [0, 1]:
+            return 0
+        elif k == 1:
+            return self.p
+        else:
+            return self.q
+
+class Binomial():
+    def __init__(self, n, p):
+        """
+        n = # of trials
+
+        For any given trial:
+            p = Probability of 1
+            1 - p = Probability of 0
+        """
+        assert(n >= 0 and type(n) == int)
+        self.n = n
+
+        assert(0 <= p <= 1)
+        self.p = p
+        self.q = 1 - self.p
+
+    def sample(self, num_samples=1):
+        assert(num_samples >= 1)
+        result = (np.random.rand(num_samples, self.n) <= self.p).astype(int)
+        # Count the # of success for of the samples
+        result = np.sum(result, axis=1)  # Sum the column value for each row
+        return result if num_samples > 1 else result[0]
+
+    def prob_of(self, k):
+        if k < 0 or k > self.n or type(k) != int:
+            return 0
+        else:
+            return n_choose_k(self.n, k) * self.p**k * self.q**(self.n - k)

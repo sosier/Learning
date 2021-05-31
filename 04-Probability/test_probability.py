@@ -10,7 +10,7 @@ from probability import (
     num_sample_possibilities, simulate_birthday_problem,
     probability_two_aces_info_comparison,
     simulate_probability_has_disease_given_positive_medical_test,
-    simulate_monty_hall_problem
+    simulate_monty_hall_problem, Bernoulli, Binomial
 )
 
 def test_multiply_range():
@@ -132,3 +132,58 @@ def test_simulate_monty_hall_problem():
     np.random.seed(12345)
     # Assert estimated probability is within 1% of 66.666...%
     assert(abs(simulate_monty_hall_problem(num_simulations=10000) - 2/3) < 0.02)
+
+def test_Bernoulli():
+    # Test .prob_of()
+    assert(Bernoulli(p=1).prob_of(1) == 1)
+    assert(Bernoulli(p=1).prob_of(0) == 0)
+    assert(Bernoulli(p=0.7).prob_of(1) == 0.7)
+    assert(round(Bernoulli(p=0.7).prob_of(0), 10) == 0.3)
+
+    # Test .sample()
+    assert(Bernoulli(p=1).sample() == 1)
+    assert(all(Bernoulli(p=1).sample(10) == 1))
+
+    np.random.seed(12345)
+    assert(Bernoulli(p=0.7).sample() == 0)
+    assert(np.array_equal(
+        Bernoulli(p=0.7).sample(3),
+        np.array([1, 1, 1])
+    ))
+
+def test_Binomial():
+    # Test .prob_of()
+    assert(Binomial(n=1, p=1).prob_of(1) == 1)
+    assert(Binomial(n=1, p=1).prob_of(0) == 0)
+    assert(Binomial(n=1, p=0.7).prob_of(1) == 0.7)
+    assert(round(Binomial(n=1, p=0.7).prob_of(0), 10) == 0.3)
+    assert(Binomial(n=5, p=1).prob_of(0) == 0)
+    assert(Binomial(n=5, p=1).prob_of(1) == 0)
+    assert(Binomial(n=5, p=1).prob_of(2) == 0)
+    assert(Binomial(n=5, p=1).prob_of(3) == 0)
+    assert(Binomial(n=5, p=1).prob_of(4) == 0)
+    assert(Binomial(n=5, p=1).prob_of(5) == 1)
+    assert(Binomial(n=5, p=1).prob_of(6) == 0)
+    assert(Binomial(n=3, p=0.5).prob_of(0) == 1/8)
+    assert(Binomial(n=3, p=0.5).prob_of(1) == 3/8)
+    assert(Binomial(n=3, p=0.5).prob_of(2) == 3/8)
+    assert(Binomial(n=3, p=0.5).prob_of(3) == 1/8)
+    assert(Binomial(n=3, p=0.5).prob_of(4) == 0)
+
+    # Test .sample()
+    assert(Binomial(n=1, p=1).sample() == 1)
+    assert(all(Binomial(n=1, p=1).sample(10) == 1))
+    assert(Binomial(n=5, p=1).sample() == 5)
+    assert(all(Binomial(n=5, p=1).sample(10) == 5))
+
+    np.random.seed(12345)
+    assert(Binomial(n=1, p=0.7).sample() == 0)
+    assert(np.array_equal(
+        Binomial(n=1, p=0.7).sample(3),
+        np.array([1, 1, 1])
+    ))
+    assert(Binomial(n=3, p=0.5).sample() == 0)
+    assert(np.array_equal(
+        Binomial(n=3, p=0.5).sample(3),
+        np.array([0, 1, 2])
+    ))
