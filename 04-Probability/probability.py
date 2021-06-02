@@ -205,3 +205,47 @@ class Binomial():
             return 0
         else:
             return n_choose_k(self.n, k) * self.p**k * self.q**(self.n - k)
+
+class Hypergeometric():
+    def __init__(self, N, K, n):
+        """
+        N = Size of overall population (int >= 0)
+        K = Total size of "success" draws (int >=0 and <= N)
+        n = # of samples without replacement (int >=0 and <= N)
+        """
+        assert(N >= 0 and type(n) == int)
+        self.N = N
+
+        assert(0 <= K <= self.N and type(K) == int)
+        self.K = K
+
+        assert(0 <= n <= self.N and type(n) == int)
+        self.n = n
+
+        self.data_set_for_sampling = np.append(
+            np.ones(self.K),
+            np.zeros(self.N - self.K)
+        )
+
+    def sample(self, num_samples=1):
+        assert(num_samples >= 1)
+        result = np.array([
+            # Sum counts # of success a.k.a. 1's
+            np.sum(np.random.choice(
+                self.data_set_for_sampling,
+                size=self.n,
+                replace=False
+            ))
+            for _ in range(num_samples)
+        ])
+
+        return result if num_samples > 1 else result[0]
+
+    def prob_of(self, k):
+        if k < 0 or k > self.K or k > self.n or type(k) != int:
+            return 0
+        else:
+            return (
+                n_choose_k(self.K, k) * n_choose_k(self.N - self.K, self.n - k)
+                / n_choose_k(self.N, self.n)
+            )

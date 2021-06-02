@@ -10,7 +10,7 @@ from probability import (
     num_sample_possibilities, simulate_birthday_problem,
     probability_two_aces_info_comparison,
     simulate_probability_has_disease_given_positive_medical_test,
-    simulate_monty_hall_problem, Bernoulli, Binomial
+    simulate_monty_hall_problem, Bernoulli, Binomial, Hypergeometric
 )
 
 def test_multiply_range():
@@ -186,4 +186,44 @@ def test_Binomial():
     assert(np.array_equal(
         Binomial(n=3, p=0.5).sample(3),
         np.array([0, 1, 2])
+    ))
+
+def test_Hypergeometric():
+    # Test .prob_of()
+    assert(Hypergeometric(N=0, K=0, n=0).prob_of(0) == 1)
+    assert(Hypergeometric(N=0, K=0, n=0).prob_of(1) == 0)
+    assert(Hypergeometric(N=10, K=0, n=8).prob_of(0) == 1)
+    assert(Hypergeometric(N=10, K=0, n=8).prob_of(1) == 0)
+    assert(Hypergeometric(N=10, K=10, n=8).prob_of(8) == 1)
+    assert(Hypergeometric(N=10, K=10, n=8).prob_of(7) == 0)
+    assert(Hypergeometric(N=10, K=10, n=8).prob_of(9) == 0)
+    assert(Hypergeometric(N=3, K=2, n=3).prob_of(2) == 1)
+    assert(Hypergeometric(N=3, K=2, n=3).prob_of(1) == 0)
+    assert(Hypergeometric(N=3, K=2, n=3).prob_of(3) == 0)
+    assert(Hypergeometric(N=3, K=2, n=2).prob_of(0) == 0)
+    assert(Hypergeometric(N=3, K=2, n=2).prob_of(1) == 2/3)
+    assert(Hypergeometric(N=3, K=2, n=2).prob_of(2) == 1/3)
+    assert(Hypergeometric(N=3, K=2, n=2).prob_of(3) == 0)
+
+    # Test .sample()
+    assert(Hypergeometric(N=1, K=1, n=1).sample() == 1)
+    assert(Hypergeometric(N=1, K=0, n=1).sample() == 0)
+    assert(np.array_equal(
+        Hypergeometric(N=1, K=1, n=1).sample(3),
+        np.ones(3)
+    ))
+    assert(np.array_equal(
+        Hypergeometric(N=1, K=0, n=1).sample(3),
+        np.zeros(3)
+    ))
+    assert(Hypergeometric(N=5, K=5, n=3).sample() == 3)
+    assert(Hypergeometric(N=5, K=0, n=3).sample() == 0)
+    assert(all(Hypergeometric(N=5, K=5, n=3).sample(3) == 3))
+    assert(all(Hypergeometric(N=5, K=0, n=3).sample(3) == 0))
+
+    np.random.seed(12345)
+    assert(Hypergeometric(N=3, K=2, n=2).sample() == 2)
+    assert(np.array_equal(
+        Hypergeometric(N=3, K=2, n=2).sample(3),
+        np.array([1, 1, 2])
     ))
