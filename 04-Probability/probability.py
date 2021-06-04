@@ -177,6 +177,9 @@ class Bernoulli():
         else:
             return self.q
 
+    def expected_value(self):
+        return self.p
+
 class Binomial():
     def __init__(self, n, p):
         """
@@ -205,6 +208,9 @@ class Binomial():
             return 0
         else:
             return n_choose_k(self.n, k) * self.p**k * self.q**(self.n - k)
+
+    def expected_value(self):
+        return self.n * self.p
 
 class Hypergeometric():
     def __init__(self, N, K, n):
@@ -249,3 +255,56 @@ class Hypergeometric():
                 n_choose_k(self.K, k) * n_choose_k(self.N - self.K, self.n - k)
                 / n_choose_k(self.N, self.n)
             )
+
+    def expected_value(self):
+        return self.n * (self.K/ self.N)
+
+class Geometric():
+    def __init__(self, p):
+        """
+        Geometric = # of "failures" before a "success" (e.g. for coin flipping,
+            the number of tails before getting a heads)
+
+        p = Probability of "success" on any given i.i.d. (independent
+            identically distributed) trial
+        """
+        assert(0 <= p <= 1)
+        self.p = p
+        self.q = 1 - p
+
+    def _sample_one(self):
+        if self.p == 0:
+            return np.inf
+        elif self.p == 1:
+            return 0
+        else:
+            count = 0
+            random_draw = np.random.rand()
+            while random_draw > self.p:
+                count += 1
+                random_draw = np.random.rand()
+
+            return count
+
+    def sample(self, num_samples=1):
+        assert(num_samples >= 1)
+        result = np.array([
+            self._sample_one()
+            for _ in range(num_samples)
+        ])
+
+        return result if num_samples > 1 else result[0]
+
+    def prob_of(self, k):
+        if k < 0 or type(k) != int:
+            return 0
+        elif k == 0 and self.p == 1:
+            return 1
+        else:
+            return self.q**k * self.p
+
+    def expected_value(self):
+        if self.p == 0:
+            return np.inf
+        else:
+            return self.q / self.p

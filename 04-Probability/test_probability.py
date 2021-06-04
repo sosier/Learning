@@ -10,7 +10,7 @@ from probability import (
     num_sample_possibilities, simulate_birthday_problem,
     probability_two_aces_info_comparison,
     simulate_probability_has_disease_given_positive_medical_test,
-    simulate_monty_hall_problem, Bernoulli, Binomial, Hypergeometric
+    simulate_monty_hall_problem, Bernoulli, Binomial, Hypergeometric, Geometric
 )
 
 def test_multiply_range():
@@ -151,6 +151,11 @@ def test_Bernoulli():
         np.array([1, 1, 1])
     ))
 
+    # Test .expected_value()
+    assert(Bernoulli(p=1).expected_value() == 1)
+    assert(Bernoulli(p=0).expected_value() == 0)
+    assert(Bernoulli(p=0.7).expected_value() == 0.7)
+
 def test_Binomial():
     # Test .prob_of()
     assert(Binomial(n=1, p=1).prob_of(1) == 1)
@@ -187,6 +192,13 @@ def test_Binomial():
         Binomial(n=3, p=0.5).sample(3),
         np.array([0, 1, 2])
     ))
+
+    # Test .expected_value()
+    assert(Binomial(n=1, p=1).expected_value() == 1)
+    assert(Binomial(n=8, p=1).expected_value() == 8)
+    assert(Binomial(n=1, p=0).expected_value() == 0)
+    assert(Binomial(n=8, p=0).expected_value() == 0)
+    assert(Binomial(n=8, p=0.5).expected_value() == 4)
 
 def test_Hypergeometric():
     # Test .prob_of()
@@ -227,3 +239,47 @@ def test_Hypergeometric():
         Hypergeometric(N=3, K=2, n=2).sample(3),
         np.array([1, 1, 2])
     ))
+
+    # Test .expected_value()
+    assert(Hypergeometric(N=3, K=2, n=2).expected_value() == 4/3)
+    assert(Hypergeometric(N=3, K=0, n=2).expected_value() == 0)
+    assert(Hypergeometric(N=3, K=3, n=2).expected_value() == 2)
+    assert(Hypergeometric(N=3, K=3, n=1).expected_value() == 1)
+
+def test_Geometric():
+    # Test .prob_of()
+    assert(Geometric(p=0).prob_of(12) == 0)
+    assert(Geometric(p=0).prob_of(0) == 0)
+    assert(Geometric(p=1).prob_of(0) == 1)
+    assert(Geometric(p=1).prob_of(12) == 0)
+    assert(Geometric(p=0.5).prob_of(0) == 0.5)
+    assert(Geometric(p=0.5).prob_of(1) == 0.25)
+    assert(Geometric(p=0.5).prob_of(2) == 0.125)
+    assert(Geometric(p=0.2).prob_of(0) == 0.2)
+    assert(abs(Geometric(p=0.2).prob_of(1) - 4/25) < 0.00000001)
+    assert(abs(Geometric(p=0.2).prob_of(2) - 16/125) < 0.00000001)
+
+    # Test .sample()
+    assert(Geometric(p=0).sample() == np.inf)
+    assert(all(Geometric(p=0).sample(3) == np.inf))
+    assert(Geometric(p=1).sample() == 0)
+    assert(all(Geometric(p=1).sample(3) == 0))
+
+    np.random.seed(12345)
+    assert(Geometric(p=0.5).sample() == 1)
+    assert(np.array_equal(
+        Geometric(p=0.5).sample(3),
+        np.array([0, 0, 8])
+    ))
+
+    assert(Geometric(p=0.8).sample() == 0)
+    assert(np.array_equal(
+        Geometric(p=0.8).sample(3),
+        np.array([0, 0, 3])
+    ))
+
+    # Test .expected_value()
+    assert(Geometric(p=0.5).expected_value() == 1)
+    assert(Geometric(p=0).expected_value() == np.inf)
+    assert(Geometric(p=1).expected_value() == 0)
+    assert(abs(Geometric(p=1/3).expected_value() - 2) < 0.000000001)
