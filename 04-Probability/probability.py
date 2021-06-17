@@ -308,3 +308,78 @@ class Geometric():
             return np.inf
         else:
             return self.q / self.p
+
+class NegativeBinomial():
+    def __init__(self, r, p):
+        """
+        Given i.i.d. Bernoulli(p) trials, # of failures before the r'th success
+
+        r = # of successes (int >= 0)
+        p = Probability of success for any given trial (float in range [0, 1])
+        """
+        assert(r >= 0 and type(r) == int)
+        self.r = r
+
+        assert(0 <= p <= 1)
+        self.p = p
+        self.q = 1 - self.p
+
+    def _sample_one(self):
+        if self.r == 0:
+            return 0
+        elif self.p == 0:
+            return np.inf
+        elif self.p == 1:
+            return 0
+        else:
+            successes = 0
+            failures = 0
+
+            while successes < self.r:
+                random_draw = np.random.rand()
+
+                if random_draw > self.p:
+                    failures += 1
+                else:
+                    successes += 1
+
+            return failures
+
+    def sample(self, num_samples=1):
+        """
+        num_samples = # of samples to perform (int >= 1)
+        """
+        assert(num_samples >= 1 and type(num_samples) == int)
+        result = np.array([
+            self._sample_one()
+            for _ in range(num_samples)
+        ])
+
+        return result if num_samples > 1 else result[0]
+
+    def prob_of(self, n):
+        if self.p == 0 and n == np.inf:
+            return 1
+        elif n < 0 or type(n) != int:
+            return 0
+        elif self.r == 0:
+            if n == 0:
+                return 1
+            else:
+                return 0
+        else:
+            return (
+                # -1 since last trial is always success, other trials can be in
+                # any order:
+                n_choose_k(n + self.r - 1, self.r - 1)
+                * self.p**self.r
+                * self.q**n
+            )
+
+    def expected_value(self):
+        if self.r == 0 or self.p == 1:
+            return 0
+        elif self.p == 0:
+            return np.inf
+        else:
+            return self.r * self.q / self.p

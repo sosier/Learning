@@ -10,7 +10,8 @@ from probability import (
     num_sample_possibilities, simulate_birthday_problem,
     probability_two_aces_info_comparison,
     simulate_probability_has_disease_given_positive_medical_test,
-    simulate_monty_hall_problem, Bernoulli, Binomial, Hypergeometric, Geometric
+    simulate_monty_hall_problem, Bernoulli, Binomial, Hypergeometric, Geometric,
+    NegativeBinomial
 )
 
 def test_multiply_range():
@@ -283,3 +284,55 @@ def test_Geometric():
     assert(Geometric(p=0).expected_value() == np.inf)
     assert(Geometric(p=1).expected_value() == 0)
     assert(abs(Geometric(p=1/3).expected_value() - 2) < 0.000000001)
+
+def test_NegativeBinomial():
+    # Test .prob_of()
+    assert(NegativeBinomial(r=0, p=0).prob_of(1) == 0)
+    assert(NegativeBinomial(r=0, p=0).prob_of(12) == 0)
+    assert(NegativeBinomial(r=0, p=0).prob_of(0) == 1)
+    assert(NegativeBinomial(r=1, p=0).prob_of(0) == 0)
+    assert(NegativeBinomial(r=1, p=0).prob_of(1) == 0)
+    assert(NegativeBinomial(r=1, p=0).prob_of(2) == 0)
+    assert(NegativeBinomial(r=1, p=0).prob_of(np.inf) == 1)
+    assert(NegativeBinomial(r=1, p=1).prob_of(0) == 1)
+    assert(NegativeBinomial(r=1, p=1).prob_of(1) == 0)
+    assert(NegativeBinomial(r=2, p=1).prob_of(0) == 1)
+    assert(NegativeBinomial(r=2, p=1).prob_of(1) == 0)
+    assert(NegativeBinomial(r=1, p=0.5).prob_of(0) == 0.5)
+    assert(NegativeBinomial(r=1, p=0.5).prob_of(1) == 0.25)
+    assert(NegativeBinomial(r=1, p=0.5).prob_of(2) == 0.125)
+    assert(NegativeBinomial(r=2, p=0.5).prob_of(0) == 0.25)
+    assert(NegativeBinomial(r=2, p=0.5).prob_of(1) == 0.25)
+    assert(NegativeBinomial(r=2, p=0.5).prob_of(2) == 0.0625 * 3)
+
+    # Test .sample()
+    assert(NegativeBinomial(r=0, p=0).sample() == 0)
+    assert(all(NegativeBinomial(r=0, p=0).sample(3) == 0))
+    assert(NegativeBinomial(r=1, p=0).sample() == np.inf)
+    assert(all(NegativeBinomial(r=1, p=0).sample(3) == np.inf))
+    assert(NegativeBinomial(r=1, p=1).sample() == 0)
+    assert(all(NegativeBinomial(r=1, p=1).sample(3) == 0))
+    assert(NegativeBinomial(r=2, p=1).sample() == 0)
+    assert(all(NegativeBinomial(r=2, p=1).sample(3) == 0))
+
+    np.random.seed(12345)
+    assert(NegativeBinomial(r=1, p=0.5).sample() == 1)
+    assert(np.array_equal(
+        NegativeBinomial(r=1, p=0.5).sample(3),
+        np.array([0, 0, 8])
+    ))
+    assert(NegativeBinomial(r=2, p=0.5).sample() == 0)
+    assert(np.array_equal(
+        NegativeBinomial(r=2, p=0.5).sample(3),
+        np.array([7, 4, 2])
+    ))
+
+    # Test .expected_value()
+    assert(NegativeBinomial(r=0, p=0).expected_value() == 0)
+    assert(NegativeBinomial(r=1, p=0).expected_value() == np.inf)
+    assert(NegativeBinomial(r=1, p=1).expected_value() == 0)
+    assert(NegativeBinomial(r=2, p=1).expected_value() == 0)
+    assert(NegativeBinomial(r=1, p=0.5).expected_value() == 1)
+    assert(NegativeBinomial(r=2, p=0.5).expected_value() == 2)
+    assert(NegativeBinomial(r=1, p=0.25).expected_value() == 3)
+    assert(NegativeBinomial(r=2, p=0.25).expected_value() == 6)
