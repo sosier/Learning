@@ -11,7 +11,7 @@ from probability import (
     probability_two_aces_info_comparison,
     simulate_probability_has_disease_given_positive_medical_test,
     simulate_monty_hall_problem, Bernoulli, Binomial, Hypergeometric, Geometric,
-    NegativeBinomial
+    NegativeBinomial, Poisson
 )
 
 def test_multiply_range():
@@ -336,3 +336,36 @@ def test_NegativeBinomial():
     assert(NegativeBinomial(r=2, p=0.5).expected_value() == 2)
     assert(NegativeBinomial(r=1, p=0.25).expected_value() == 3)
     assert(NegativeBinomial(r=2, p=0.25).expected_value() == 6)
+
+def test_Poisson():
+    # Test .prob_of()
+    assert(Poisson(lmbda=0).prob_of(0) == 1)
+    assert(Poisson(lmbda=0).prob_of(1) == 0)
+    assert(Poisson(lmbda=1).prob_of(0) == 1/np.exp(1))
+    assert(Poisson(lmbda=1).prob_of(1) == 1/np.exp(1))
+    assert(Poisson(lmbda=1).prob_of(2) == 1/(2 * np.exp(1)))
+    assert(round(Poisson(lmbda=2.5).prob_of(0), 3) == 0.082)
+    assert(round(Poisson(lmbda=2.5).prob_of(1), 3) == 0.205)
+    assert(round(Poisson(lmbda=2.5).prob_of(2), 3) == 0.257)
+
+    # Test .sample()
+    assert(Poisson(lmbda=0).sample() == 0)
+    assert(all(Poisson(lmbda=0).sample(3) == 0))
+
+    np.random.seed(12345)
+    assert(Poisson(lmbda=1).sample() == 2)
+    assert(np.array_equal(
+        Poisson(lmbda=1).sample(3),
+        np.array([2, 0, 1])
+    ))
+    assert(Poisson(lmbda=5).sample() == 0)
+    assert(np.array_equal(
+        Poisson(lmbda=5).sample(3),
+        np.array([3, 2, 4])
+    ))
+
+    # Test .expected_value()
+    assert(Poisson(lmbda=0).expected_value() == 0)
+    assert(Poisson(lmbda=2).expected_value() == 2)
+    assert(Poisson(lmbda=3.7).expected_value() == 3.7)
+    assert(Poisson(lmbda=42).expected_value() == 42)

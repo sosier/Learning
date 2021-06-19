@@ -383,3 +383,51 @@ class NegativeBinomial():
             return np.inf
         else:
             return self.r * self.q / self.p
+
+class Poisson():
+    def __init__(self, lmbda):
+        """
+        Count of "successes" in a fixed time period (e.g. day, month, year,
+        etc.) given some average rate of occurance (lambda), e.g. 3 per day on
+        average
+
+        Also equal to the limit of the Binomial distribution as n apporaches
+        infinity and p for any given n approaches 0
+
+        lmbda = lambda shortened b/c lambda is a reserved word in Python; as
+            above the average # of successes in the time period ("rate")
+            (float >= 0)
+        """
+        assert(lmbda >= 0)
+        self.lmbda = lmbda
+
+    def sample(self, num_samples=1, accuracy=1000):
+        """
+        Returns an approximate Poisson sample using the Binomial distribution
+        with a large n and small p
+
+        num_samples = # of samples to perform (int >= 1)
+        accuracy = parameter controlling how precise the approximation should be
+            (higher = more accurate; defaults 1000 or n = round(1000 x lambda)
+            and p = 1/1000)
+        """
+        if self.lmbda == 0:
+            return Binomial(0, 0).sample(num_samples)
+
+        n = round(self.lmbda * accuracy)
+        p = self.lmbda / n
+        return Binomial(n, p).sample(num_samples)
+
+    def prob_of(self, k):
+        """
+        Derived by the limit of the PMF (`prob_of()`) of `Binomial(n, p)` as n
+        apporaches infinity and p apporaches 0
+        """
+        assert(k >= 0 and type(k) == int)
+        return (
+            (self.lmbda**k / factorial(k))
+            * np.exp(-self.lmbda)
+        )
+
+    def expected_value(self):
+        return self.lmbda  # by definition
