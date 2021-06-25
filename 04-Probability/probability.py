@@ -431,3 +431,60 @@ class Poisson():
 
     def expected_value(self):
         return self.lmbda  # by definition
+
+class Uniform():
+    def __init__(self, start, end):
+        """
+        Simply a continuous distribution where all values in some range are
+        equally likely (or more precisely all equally sized ranges of values in
+        some larger range are equally likely)
+
+        start = Start of the range (numeric)
+        end = End of the range (numeric)
+        """
+        assert(-np.inf < float(start) < float(end) < np.inf)
+        self.start = start
+        self.end = end
+        self.range = self.end - self.start
+
+    def sample(self, num_samples=1):
+        """
+        num_samples = # of samples to perform (int >= 1)
+        """
+        assert(num_samples >= 1 and type(num_samples) == int)
+        result = np.random.rand(num_samples)
+        result = (result * self.range) + self.start
+
+        return result if num_samples > 1 else result[0]
+
+    def prob_of(self, start=-np.inf, end=np.inf):
+        assert(start <= end)
+
+        if start == -np.inf and end == np.inf:
+            return 1
+        elif start <= self.start and end >= self.end:
+            return 1
+        elif start > self.end or end < self.start:
+            return 0
+        else:
+            if start <= self.start:
+                start = self.start
+
+            if end >= self.end:
+                end = self.end
+
+            return (end - start) / self.range
+
+    def expected_value(self):
+        return self.start + self.range / 2
+
+    def variance(self):
+        """
+        Derived by E( (X - E(X))**2 ) = E(X**2) - E(X)**2, then calculating and
+        filling in E(X**2) and E(X)**2 and simplifying (full calcuations too
+        long to include here)
+        """
+        return self.range**2 / 12
+
+    def standard_deviation(self):
+        return np.sqrt(self.variance())

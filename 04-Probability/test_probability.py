@@ -11,7 +11,7 @@ from probability import (
     probability_two_aces_info_comparison,
     simulate_probability_has_disease_given_positive_medical_test,
     simulate_monty_hall_problem, Bernoulli, Binomial, Hypergeometric, Geometric,
-    NegativeBinomial, Poisson
+    NegativeBinomial, Poisson, Uniform
 )
 
 def test_multiply_range():
@@ -369,3 +369,46 @@ def test_Poisson():
     assert(Poisson(lmbda=2).expected_value() == 2)
     assert(Poisson(lmbda=3.7).expected_value() == 3.7)
     assert(Poisson(lmbda=42).expected_value() == 42)
+
+def test_Uniform():
+    # Test .prob_of()
+    assert(Uniform(0, 1).prob_of() == 1)
+    assert(Uniform(0, 1).prob_of(0, 1) == 1)
+    assert(Uniform(-37.3, 142).prob_of() == 1)
+    assert(Uniform(-37.3, 142).prob_of(-37.3, 142) == 1)
+    assert(Uniform(0, 1).prob_of(0, 0.5) == 0.5)
+    assert(Uniform(0, 1).prob_of(0.2, 0.5) == 0.3)
+    assert(Uniform(0, 10).prob_of(0, 0.5) == 0.05)
+    assert(Uniform(0, 10).prob_of(0.2, 0.5) == 0.03)
+
+    # Test .sample()
+    np.random.seed(12345)
+    assert(Uniform(0, 1).sample() == 0.9296160928171479)
+    assert(Uniform(2.3, 11.9).sample() == 5.337205323985145)
+    assert(Uniform(-10, -1).sample() == -8.34473069490615)
+
+    assert(np.allclose(
+        Uniform(0, 1).sample(3),
+        np.array([0.20456028, 0.56772503, 0.5955447])
+    ))
+    assert(np.allclose(
+        Uniform(2.3, 11.0).sample(3),
+        np.array([10.69127632,  7.98264074,  8.81548775])
+    ))
+
+    # Test .expected_value()
+    assert(Uniform(0, 1).expected_value() == 0.5)
+    assert(Uniform(0, 0.1).expected_value() == 0.05)
+    assert(Uniform(-10, -1).expected_value() == -5.5)
+
+    # Test .variance()
+    assert(Uniform(0, 1).variance() == 1/12)
+    assert(Uniform(0, 10).variance() == 100/12)
+    assert(Uniform(1, 2).variance() == 1/12)
+    assert(Uniform(1, 11).variance() == 100/12)
+
+    # Test.standard_deviation()
+    assert(Uniform(0, 1).standard_deviation() == np.sqrt(1/12))
+    assert(Uniform(0, 10).standard_deviation() == np.sqrt(100/12))
+    assert(Uniform(1, 2).standard_deviation() == np.sqrt(1/12))
+    assert(Uniform(1, 11).standard_deviation() == np.sqrt(100/12))
