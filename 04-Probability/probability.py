@@ -180,6 +180,31 @@ class Bernoulli():
     def expected_value(self):
         return self.p
 
+    def variance(self):
+        """
+        Derived by E( (X - E(X))**2 ) = E(X**2) - E(X)**2, then calculating and
+        filling in E(X**2) and E(X)**2 and simplifying:
+
+          E(X**2) = sum([ x**2 * P(X = x) for all x])       # By LOTUS
+            x can only be 0 or 1 so:
+                  = 0**2 * P(X = 0) + 1**2 * P(X = 1)
+                  = P(X = 1)
+                  = p
+
+          E(X) = p
+          E(X)**2 = p**2
+
+          E(X**2) - E(X)**2 = p - p**2
+                            = p * (1 - p)
+                            = p * q
+
+        """
+        return self.p * self.q
+
+    def standard_deviation(self):
+        return np.sqrt(self.variance())
+
+
 class Binomial():
     def __init__(self, n, p):
         """
@@ -211,6 +236,21 @@ class Binomial():
 
     def expected_value(self):
         return self.n * self.p
+
+    def variance(self):
+        """
+        Derivation:
+         1. Binomial = sum of n i.i.d. independent identically distributed
+            Bernoulli(p)
+         2. Var(X + Y) = Var(X) + Var(Y) if X and Y and independent
+         3. From 1 & 2:
+            Var(Binomial(n, p)) = n * Var(Bernoulli(p))
+                                = n * p * q
+        """
+        return self.n * self.p * self.q
+
+    def standard_deviation(self):
+        return np.sqrt(self.variance())
 
 class Hypergeometric():
     def __init__(self, N, K, n):
@@ -258,6 +298,12 @@ class Hypergeometric():
 
     def expected_value(self):
         return self.n * (self.K/ self.N)
+
+    def variance(self):
+        pass
+
+    def standard_deviation(self):
+        return np.sqrt(self.variance())
 
 class Geometric():
     def __init__(self, p):
@@ -308,6 +354,42 @@ class Geometric():
             return np.inf
         else:
             return self.q / self.p
+
+    def variance(self):
+        """
+        Derived by E( (X - E(X))**2 ) = E(X**2) - E(X)**2, then calculating and
+        filling in E(X**2) and E(X)**2 and simplifying:
+
+          E(X**2) = sum([ k**2 * P(X = k) for all k])       # By LOTUS
+            k can be 0 to infinity:
+                  = sum_to_infinity([k**2 * q**k * p])
+                  = p * sum_to_infinity([k**2 * q**k])
+
+            sum_to_infinity([k**2 * q**k]) = q * (1 + q) / (1 - q)**3
+            (from https://en.wikipedia.org/wiki/List_of_mathematical_series#Low-order_polylogarithms
+            --> see Li_-2(z))
+
+                  = p * q * (1 + q) / (1 - q)**3
+
+            Because q = 1 - p, 1 - q = p:
+                  = p * q * (1 + q) / p**3
+                  = q * (1 + q) / p**2
+
+          E(X) = q / p
+          E(X)**2 = q**2 / p**2
+
+          E(X**2) - E(X)**2 = q * (1 + q) / p**2 - q**2 / p**2
+                            = (q + q**2 - q**2) / p**2
+                            = q / p**2
+        """
+        if self.p == 0:
+            return np.inf
+        else:
+            return self.q / self.p**2
+
+    def standard_deviation(self):
+        return np.sqrt(self.variance())
+
 
 class NegativeBinomial():
     def __init__(self, r, p):
@@ -384,6 +466,12 @@ class NegativeBinomial():
         else:
             return self.r * self.q / self.p
 
+    def variance(self):
+        pass
+
+    def standard_deviation(self):
+        return np.sqrt(self.variance())
+
 class Poisson():
     def __init__(self, lmbda):
         """
@@ -431,6 +519,46 @@ class Poisson():
 
     def expected_value(self):
         return self.lmbda  # by definition
+
+    def variance(self):
+        """
+        Derived by E( (X - E(X))**2 ) = E(X**2) - E(X)**2, then calculating and
+        filling in E(X**2) and E(X)**2 and simplifying:
+
+          E(X**2) = sum([ k**2 * P(X = k) for all k])       # By LOTUS
+            k can be 0 to infinity:
+                  = sum_to_infinity([k**2 * e**-lambda * lambda**k / k!])
+                  = e**-lambda * sum_to_infinity([k**2 * lambda**k / k!])
+
+            Starting with Taylor series for e**x:
+              sum_to_infinity([lambda**k / k!]) = e**lambda
+            1. Take derivative of each side with respect to lambda:
+              sum_to_infinity([k * lambda**(k-1) / k!]) = e**lambda
+            2. Multipy each side by lambda ("replinish the lambda"):
+              sum_to_infinity([k * lambda**k / k!]) = lambda * e**lambda
+            3. Take derivative of each side with respect to lambda:
+              sum_to_infinity([k**2 * lambda**(k-1) / k!]) = lambda * e**lambda + e**lambda
+                                                           = e**lambda * (lambda + 1)
+            4. Multipy each side by lambda ("replinish the lambda"):
+              sum_to_infinity([k**2 * lambda**k / k!]) = e**lambda * (lambda + 1) * lambda
+
+          (continuing E(X**2)...)
+                  = e**-lambda * sum_to_infinity([k**2 * lambda**k / k!])
+            From #4 above:
+                  = e**-lambda * e**lambda * (lambda + 1) * lambda
+                  = (lambda + 1) * lambda
+                  = lambda**2 + lambda
+
+          E(X) = lambda
+          E(X)**2 = lambda**2
+
+          E(X**2) - E(X)**2 = lambda**2 + lambda - lambda**2
+                            = lambda
+        """
+        return self.lmbda
+
+    def standard_deviation(self):
+        return np.sqrt(self.variance())
 
 class Uniform():
     def __init__(self, start, end):
@@ -488,3 +616,93 @@ class Uniform():
 
     def standard_deviation(self):
         return np.sqrt(self.variance())
+
+class Normal():
+    def __init__(self, mu=0, sigma_squared=1):
+        """
+        mu = mean of the distribution (numeric)
+        sigma_squared = variance (numeric >= 0)
+        """
+        assert(sigma_squared >= 0)
+        self.mu = mu
+        self.sigma_squared = sigma_squared
+
+    def sample(self, num_samples=1, precision=1000):
+        """
+        num_samples = # of samples to perform (int >= 1)
+        precision = # of samples to use to construct the generating
+            approximately normal distribution (higher = more accurate)
+        """
+        assert(num_samples >= 1 and type(num_samples) == int)
+
+        # Generate an appoximately normal distribution using the sum of 30
+        # repeated random Uniform(0, 1):
+        raw_data = np.random.rand(precision, 30)
+        raw_data = np.sum(raw_data, axis=1)
+        appox_normal_mean = np.mean(raw_data)
+        appox_normal_standard_deviation = np.std(raw_data)
+
+        # Repeat the same process to draw our "result" sample from the
+        # approximately normal distribution:
+        result = np.random.rand(num_samples, 30)
+        result = np.sum(result, axis=1)
+
+        # Calculate appoximate normal result to standard normal result:
+        result = (result - appox_normal_mean) / appox_normal_standard_deviation
+
+        # Convert to result for this particular Normal:
+        result = result * np.sqrt(self.sigma_squared) + self.mu
+
+        return result if num_samples > 1 else result[0]
+
+    def __PMF(self, x):
+        return np.exp(-x**2/2) / np.sqrt(2 * np.pi)
+
+    def __sub_F_of_PMF(self, z, n):
+        """
+        Antiderivative of (-1/2)**n * z**2n / n! with respect to z
+        """
+        return (-1/2)**n * z**(2*n + 1)/(2*n + 1) / factorial(n) # + c
+
+    def prob_of(self, start=-np.inf, end=np.inf, precision=30):
+        """
+        No closed form "indefinite" integral of this can be calculated so we
+        have to approximate it using the Taylor series for e**x:
+            e**x = sum_to_infinity(x**n / n!)
+
+        N(z) = 1 / sqrt(2 * pi) * e**(-z**2/2)
+        N(z) = 1 / sqrt(2 * pi) * sum_to_infinity(x**n / n!)
+            ...where x = -z**2/2
+        N(z) = 1 / sqrt(2 * pi) * sum_to_infinity((-z**2/2)**n / n!)
+
+        integral_a_to_b(N(z))
+            = 1 / sqrt(2 * pi) * sum_to_infinity(integral_a_to_b((-z**2/2)**n / n!))
+            = 1 / sqrt(2 * pi) * sum_to_infinity(integral_a_to_b((-1/2)**n * z**2n / n!))
+            = 1 / sqrt(2 * pi) * sum_to_infinity(F(b, n) - F(a, n))
+                ...where antiderivative F(x, n) = (-1/2)**n * x**(2n + 1)/(2n + 1) / n! + c
+        """
+        assert(start <= end)
+
+        if start == -np.inf and end == np.inf:
+            return 1
+        else:
+            # Standardize start and stop:
+            sigma = np.sqrt(self.sigma_squared)
+            start = (start - self.mu) / sigma
+            end = (end - self.mu) / sigma
+
+            return 1/np.sqrt(2 * np.pi) * np.sum([
+                self.__sub_F_of_PMF(end, n) - self.__sub_F_of_PMF(start, n)
+                for n in range(0, precision)
+            ])
+
+    def expected_value(self):
+        return self.mu  # By definition
+
+    def variance(self):
+        return self.sigma_squared  # By definition
+
+    def standard_deviation(self):
+        return np.sqrt(self.variance())
+
+print(sorted(Normal(0, 1).sample(100)))

@@ -11,7 +11,7 @@ from probability import (
     probability_two_aces_info_comparison,
     simulate_probability_has_disease_given_positive_medical_test,
     simulate_monty_hall_problem, Bernoulli, Binomial, Hypergeometric, Geometric,
-    NegativeBinomial, Poisson, Uniform
+    NegativeBinomial, Poisson, Uniform, Normal
 )
 
 def test_multiply_range():
@@ -157,6 +157,18 @@ def test_Bernoulli():
     assert(Bernoulli(p=0).expected_value() == 0)
     assert(Bernoulli(p=0.7).expected_value() == 0.7)
 
+    # Test .variance()
+    assert(Bernoulli(p=1).variance() == 0)
+    assert(Bernoulli(p=0).variance() == 0)
+    assert(Bernoulli(p=0.5).variance() == 0.25)
+    assert(abs(Bernoulli(p=0.8).variance() - 0.16) < 0.00000001)
+
+    # Test .standard_deviation()
+    assert(Bernoulli(p=1).standard_deviation() == 0)
+    assert(Bernoulli(p=0).standard_deviation() == 0)
+    assert(Bernoulli(p=0.5).standard_deviation() == np.sqrt(0.25))
+    assert(abs(Bernoulli(p=0.8).standard_deviation() - np.sqrt(0.16)) < 0.00000001)
+
 def test_Binomial():
     # Test .prob_of()
     assert(Binomial(n=1, p=1).prob_of(1) == 1)
@@ -200,6 +212,26 @@ def test_Binomial():
     assert(Binomial(n=1, p=0).expected_value() == 0)
     assert(Binomial(n=8, p=0).expected_value() == 0)
     assert(Binomial(n=8, p=0.5).expected_value() == 4)
+
+    # Test .variance()
+    assert(Binomial(n=1, p=1).variance() == 0)
+    assert(Binomial(n=1, p=0).variance() == 0)
+    assert(Binomial(n=1, p=0.5).variance() == 0.25)
+    assert(abs(Binomial(n=1, p=0.8).variance() - 0.16) < 0.00000001)
+    assert(Binomial(n=10, p=1).variance() == 0)
+    assert(Binomial(n=10, p=0).variance() == 0)
+    assert(Binomial(n=10, p=0.5).variance() == 2.5)
+    assert(abs(Binomial(n=10, p=0.8).variance() - 1.6) < 0.00000001)
+
+    # Test .standard_deviation()
+    assert(Binomial(n=1, p=1).standard_deviation() == 0)
+    assert(Binomial(n=1, p=0).standard_deviation() == 0)
+    assert(Binomial(n=1, p=0.5).standard_deviation() == np.sqrt(0.25))
+    assert(abs(Binomial(n=1, p=0.8).standard_deviation() - np.sqrt(0.16)) < 0.00000001)
+    assert(Binomial(n=10, p=1).standard_deviation() == 0)
+    assert(Binomial(n=10, p=0).standard_deviation() == 0)
+    assert(Binomial(n=10, p=0.5).standard_deviation() == np.sqrt(2.5))
+    assert(abs(Binomial(n=10, p=0.8).standard_deviation() - np.sqrt(1.6)) < 0.00000001)
 
 def test_Hypergeometric():
     # Test .prob_of()
@@ -284,6 +316,16 @@ def test_Geometric():
     assert(Geometric(p=0).expected_value() == np.inf)
     assert(Geometric(p=1).expected_value() == 0)
     assert(abs(Geometric(p=1/3).expected_value() - 2) < 0.000000001)
+
+    # Test .variance()
+    assert(Geometric(p=0).variance() == np.inf)
+    assert(Geometric(p=1).variance() == 0)
+    assert(Geometric(p=0.5).variance() == 2)
+
+    # Test .standard_deviation()
+    assert(Geometric(p=0).standard_deviation() == np.inf)
+    assert(Geometric(p=1).standard_deviation() == 0)
+    assert(Geometric(p=0.5).standard_deviation() == np.sqrt(2))
 
 def test_NegativeBinomial():
     # Test .prob_of()
@@ -370,6 +412,18 @@ def test_Poisson():
     assert(Poisson(lmbda=3.7).expected_value() == 3.7)
     assert(Poisson(lmbda=42).expected_value() == 42)
 
+    # Test .variance()
+    assert(Poisson(lmbda=0).variance() == 0)
+    assert(Poisson(lmbda=2).variance() == 2)
+    assert(Poisson(lmbda=3.7).variance() == 3.7)
+    assert(Poisson(lmbda=42).variance() == 42)
+
+    # Test .standard_deviation()
+    assert(Poisson(lmbda=0).standard_deviation() == 0)
+    assert(Poisson(lmbda=2).standard_deviation() == np.sqrt(2))
+    assert(Poisson(lmbda=3.7).standard_deviation() == np.sqrt(3.7))
+    assert(Poisson(lmbda=42).standard_deviation() == np.sqrt(42))
+
 def test_Uniform():
     # Test .prob_of()
     assert(Uniform(0, 1).prob_of() == 1)
@@ -412,3 +466,61 @@ def test_Uniform():
     assert(Uniform(0, 10).standard_deviation() == np.sqrt(100/12))
     assert(Uniform(1, 2).standard_deviation() == np.sqrt(1/12))
     assert(Uniform(1, 11).standard_deviation() == np.sqrt(100/12))
+
+def test_Normal():
+    # Test .prob_of()
+    assert(Normal(0, 1).prob_of() == 1)
+    assert(Normal(0.789, 1237).prob_of() == 1)
+    assert(round(Normal(0, 1).prob_of(-1, 1), 12) == 0.682689492137)
+    assert(round(Normal(0, 1).prob_of(-2, 2), 12) == 0.954499736104)
+    assert(round(Normal(0, 1).prob_of(-3, 3), 12) == 0.997300203937)
+    assert(round(Normal(10, 1).prob_of(9, 11), 12) == 0.682689492137)
+    assert(round(Normal(10, 1).prob_of(8, 12), 12) == 0.954499736104)
+    assert(round(Normal(10, 1).prob_of(7, 13), 12) == 0.997300203937)
+    assert(round(Normal(0, 9).prob_of(-3, 3), 12) == 0.682689492137)
+    assert(round(Normal(0, 9).prob_of(-6, 6), 12) == 0.954499736104)
+    assert(round(Normal(0, 9).prob_of(-9, 9), 12) == 0.997300203937)
+    assert(round(Normal(10, 9).prob_of(7, 13), 12) == 0.682689492137)
+    assert(round(Normal(10, 9).prob_of(4, 16), 12) == 0.954499736104)
+    assert(round(Normal(10, 9).prob_of(1, 19), 12) == 0.997300203937)
+
+    # Test .sample()
+    np.random.seed(12345)
+    assert(Normal(0, 1).sample() == -0.09224845063973232)
+    assert(Normal(0, 10).sample() == -5.421939275342601)
+    assert(Normal(10, 1).sample() == 10.835346291858222)
+    assert(Normal(10, 10).sample() == 1.4388992952132398)
+
+    assert(np.allclose(
+        Normal(0, 1).sample(3),
+        np.array([1.32331351, -0.62573778,  1.23488571])
+    ))
+    assert(np.allclose(
+        Normal(0, 10).sample(3),
+        np.array([3.08668587,  2.95486075, -0.26587742])
+    ))
+    assert(np.allclose(
+        Normal(10, 1).sample(3),
+        np.array([9.97228541, 9.95699953, 9.50904269])
+    ))
+    assert(np.allclose(
+        Normal(10, 10).sample(3),
+        np.array([8.6934384 , 11.23636856,  9.22880499])
+    ))
+
+    # Test .expected_value()
+    assert(Normal(0, 1).expected_value() == 0)
+    assert(Normal(0, 0.1).expected_value() == 0)
+    assert(Normal(-10, 11.37).expected_value() == -10)
+
+    # Test .variance()
+    assert(Normal(0, 1).variance() == 1)
+    assert(Normal(0, 10).variance() == 10)
+    assert(Normal(1, 2).variance() == 2)
+    assert(Normal(1, 11).variance() == 11)
+
+    # Test.standard_deviation()
+    assert(Normal(0, 1).standard_deviation() == 1)
+    assert(Normal(0, 100).standard_deviation() == 10)
+    assert(Normal(1, 4).standard_deviation() == 2)
+    assert(Normal(1, 121).standard_deviation() == 11)
