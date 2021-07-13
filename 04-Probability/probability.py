@@ -704,5 +704,3 @@ class Normal():
 
     def standard_deviation(self):
         return np.sqrt(self.variance())
-
-print(sorted(Normal(0, 1).sample(100)))
