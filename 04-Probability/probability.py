@@ -704,3 +704,131 @@ class Normal():
 
     def standard_deviation(self):
         return np.sqrt(self.variance())
+
+class Exponential():
+    def __init__(self, lmbda):
+        """
+        Continuous time between events in a Poisson. Derived from calcuating the
+        distribution of t (time) until the first event in a Poisson:
+
+        Let X be the # of Poisson events in time t given a rate lambda per
+        unit t (time):
+            X ~ Poisson(t * lambda)
+
+        Find CDF(t) of time until the first Poisson event.
+
+        Probability of no events by time t:
+            P(X = 0) = e**-(t * lambda) * (t * lambda)**0 / 0!
+                     = e**-(t * lambda)
+
+        Probability of >= 1 event by time t:
+            P(X >= 1) = 1 - P(X = 0)
+                      = 1 - e**-(t * lambda)
+                      = 1 - e**-(lambda * t)
+
+        e**-(lambda * t) = 1 when t = 0
+            and approaches 0 as t approaches infinity
+
+        Thus:
+            1 - e**-(lambda * t) is strictly increasing and a valid CDF
+            CDF(t) of time until the first Poisson event = 1 - e**-(lambda * t)
+            = CDF(Exponential(lambda))
+
+        Parameters:
+            lmbda = lambda shortened b/c lambda is a reserved word in Python;
+                the average # of Poisson successes in a time period ("rate");
+                e.g. rate per day, rate per month, etc.
+                (float > 0)
+        """
+        assert(lmbda > 0)
+        self.lmbda = lmbda
+
+    def sample(self, num_samples=1):
+        """
+        num_samples = # of samples to perform (int >= 1)
+        """
+        assert(num_samples >= 1 and type(num_samples) == int)
+
+        result = np.random.rand(num_samples)
+        result = np.log(1 - result) / (-1 * self.lmbda)
+
+        return result if num_samples > 1 else result[0]
+
+    def __CDF(self, t):
+        """
+        Cumulative Distribution Function
+        P(Exponential(lambda) <= t)
+
+        CDF proven in Exponential.__init__()
+
+        t = time
+        """
+        if t <= 0:
+            return 0
+        else:
+            return 1 - np.exp(-self.lmbda * t)
+
+    def prob_of(self, start=-np.inf, end=np.inf):
+        assert(start <= end)
+
+        if start == -np.inf and end == np.inf:
+            return 1
+        else:
+            return self.__CDF(end) - self.__CDF(start)
+
+    def expected_value(self):
+        """
+        X ~ Exponential(lambda)
+        PDF(X) = derivative(CDF(X))
+               = derivative(1 - e**(-lambda * x))
+               = -e**(-lambda * x) * -lambda
+               = lambda * e**(-lambda * x)
+        E(X) = integral_0_to_inf(x * PDF(X) dx)
+             = integral_0_to_inf(x * lambda * e**(-lambda * x) dx)
+        Using integration by parts:
+             Let u = lambda * x
+                 dv = e**(-lambda * x) dx
+             Thus du = lambda dx
+                   v = -e**(-lambda * x) / lambda
+        E(X) = u * v - integral_0_to_inf(v * du)
+             = lambda * x * -e**(-lambda * x) / lambda
+                - integral_0_to_inf(-e**(-lambda * x) / lambda * lambda dx)
+             = -x * e**(-lambda * x) - integral_0_to_inf(-e**(-lambda * x) dx)
+             = -x * e**(-lambda * x) - e**(-lambda * x) / lambda
+             = -e**(-lambda * x) * (x + 1/lambda) | eval at 0 to inf
+             = 0 - (-1 * (0 + 1/lambda))
+             = 1/lambda
+        """
+        return 1 / self.lmbda
+
+    def variance(self):
+        """
+        X ~ Exponential(lambda)
+        Var(X) = E(X**2) - E(X)**2
+        E(X**2) = integral_0_to_inf(x**2 * PDF(X) dx)
+                = integral_0_to_inf(x**2 * lambda * e**(-lambda * x) dx)
+        Using integration by parts:
+            Let u = lambda * x**2 --> du = 2 * lambda * x dx
+            Let dv = e**(-lambda * x) dx --> v = -e**(-lambda * x) / lambda
+        E(X**2) = u * v - integral_0_to_inf(v * du)
+                = lambda * x**2 * -e**(-lambda * x) / lambda | eval at 0 to inf
+                  - integral_0_to_inf(-e**(-lambda * x) / lambda * 2 * lambda * x dx)
+                = -x**2 * e**(-lambda * x) | eval at 0 to inf
+                  + 2 * integral_0_to_inf(x * e**(-lambda * x) dx)
+        Multipying by 1 = (lambda/lambda):
+                = (0 - 0)
+                  + 2 * lambda / lambda * integral_0_to_inf(x * e**(-lambda * x) dx)
+                = (2  / lambda) * integral_0_to_inf(x * lambda * e**(-lambda * x) dx)
+        integral_0_to_inf(x * lambda * e**(-lambda * x) dx) = E(X)
+        E(X) = 1 / lambda
+        E(X**2) = (2  / lambda) * (1 / lambda)
+                = 2  / lambda**2
+        Var(X) = E(X**2) - E(X)**2
+               = 2  / lambda**2 - (1 / lambda)**2
+               = 2  / lambda**2 - 1 / lambda**2
+               = 1 / lambda**2
+        """
+        return 1 / self.lmbda**2
+
+    def standard_deviation(self):
+        return np.sqrt(self.variance())

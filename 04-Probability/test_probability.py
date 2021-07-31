@@ -11,7 +11,7 @@ from probability import (
     probability_two_aces_info_comparison,
     simulate_probability_has_disease_given_positive_medical_test,
     simulate_monty_hall_problem, Bernoulli, Binomial, Hypergeometric, Geometric,
-    NegativeBinomial, Poisson, Uniform, Normal
+    NegativeBinomial, Poisson, Uniform, Normal, Exponential
 )
 
 def test_multiply_range():
@@ -524,3 +524,46 @@ def test_Normal():
     assert(Normal(0, 100).standard_deviation() == 10)
     assert(Normal(1, 4).standard_deviation() == 2)
     assert(Normal(1, 121).standard_deviation() == 11)
+
+def test_Exponential():
+    # Test .prob_of()
+    assert(Exponential(12).prob_of() == 1)
+    assert(Exponential(1287456.35).prob_of() == 1)
+    assert(Exponential(1).prob_of(0, 1) == (1 - np.exp(-1)))
+    assert(Exponential(1).prob_of(0, 2) == (1 - np.exp(-2)))
+    assert(Exponential(1).prob_of(1, 2) == (np.exp(-1) - np.exp(-2)))
+    assert(Exponential(1.2).prob_of(0, 1) == (1 - np.exp(-1.2)))
+    assert(Exponential(1.2).prob_of(0, 2) == (1 - np.exp(-2.4)))
+    assert(
+        round(Exponential(1.2).prob_of(1, 2), 10)
+        == round(np.exp(-1.2) - np.exp(-2.4), 10)
+    )
+
+    # Test .sample()
+    np.random.seed(12345)
+    assert(Exponential(1).sample() == 2.6537906331017487)
+    assert(Exponential(20.3).sample() == 0.018736284165141427)
+
+    assert(np.allclose(
+        Exponential(1).sample(3),
+        np.array([0.20324143, 0.22886021, 0.83869339])
+    ))
+    assert(np.allclose(
+        Exponential(20.3).sample(3),
+        np.array([0.04459183, 0.16446461, 0.05216458])
+    ))
+
+    # Test .expected_value()
+    assert(Exponential(1).expected_value() == 1)
+    assert(Exponential(0.5).expected_value() == 2)
+    assert(Exponential(2).expected_value() == 1/2)
+
+    # Test .variance()
+    assert(Exponential(1).variance() == 1)
+    assert(Exponential(0.5).variance() == 4)
+    assert(Exponential(2).variance() == 1/4)
+
+    # Test.standard_deviation()
+    assert(Exponential(1).standard_deviation() == 1)
+    assert(Exponential(0.5).standard_deviation() == 2)
+    assert(Exponential(2).standard_deviation() == 1/2)
