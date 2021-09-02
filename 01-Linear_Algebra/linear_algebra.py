@@ -59,10 +59,12 @@ class Vector():
         if is_numeric(other):
             return Vector(*[other * num for num in self.vector])
         else:
+            # fmt: off
             return Vector(*[
                 x * y
                 for x, y in zip(self.vector, other.vector)
             ])
+            # fmt: on
 
     def __rmul__(self, other):
         return self.__mul__(other)
@@ -99,10 +101,12 @@ class Vector():
         return self.dot_product(other)
 
     def cosine_similarity(self, other):
+        # fmt: off
         return (
             self.dot(other) /
             (self.magnitude() * other.magnitude())
         )
+        # fmt: on
 
     def cosine_distance(self, other):
         """
@@ -164,27 +168,31 @@ class Vector():
     def change_basis(self, *basis_vectors):
         assert(all([isinstance(vector, Vector) for vector in basis_vectors]))
         assert(all([len(self) == len(vector) for vector in basis_vectors]))
-        assert(all([
+        # fmt: off
+        assert all([
             # All basis vectors must be orthogonal to eachother
             vector_a.orthogonal_to(vector_b)
             for vector_a, vector_b in combinations(basis_vectors, 2)
-        ]))
+        ])
         return Vector(*[
             self.vector_projection_scalar(basis_vector)
             for basis_vector in basis_vectors
         ])
+        # fmt: on
 
 class Matrix():
     """
     A matrix is an ordered, "rectangular" list of numbers (with rows and columns)
     """
     def __init__(self, *rows_of_numbers):
-        if (len(rows_of_numbers) == 1
-                and type(rows_of_numbers[0]) == list
-                and (
-                    len(rows_of_numbers[0]) == 0
-                    or type(rows_of_numbers[0][0]) == list
-                )):
+        if (
+            len(rows_of_numbers) == 1
+            and type(rows_of_numbers[0]) == list
+            and (
+                len(rows_of_numbers[0]) == 0
+                or type(rows_of_numbers[0][0]) == list
+            )
+        ):
             rows_of_numbers = rows_of_numbers[0]
 
         for row in rows_of_numbers:
@@ -219,10 +227,12 @@ class Matrix():
         return self.num_rows == self.num_columns
 
     def transpose(self):
+        # fmt: off
         return Matrix([
             [self[r][c] for r in range(self.num_rows)]
             for c in range(self.num_columns)
         ])
+        # fmt: on
 
     @property
     def T(self):
@@ -233,7 +243,8 @@ class Matrix():
 
     def is_orthonormal(self):
         column_vectors = self.T.matrix
-        return(
+        # fmt: off
+        return (
             all([
                 # All column vectors must be orthogonal to eachother
                 Vector(vector_a).orthogonal_to(Vector(vector_b))
@@ -245,9 +256,11 @@ class Matrix():
                 for vector in column_vectors
             ])
         )
+        # fmt: on
 
     def __eq__(self, other):
         try:
+            # fmt: off
             return (
                 self.dimensions() == other.dimensions()
                 and all(
@@ -256,6 +269,7 @@ class Matrix():
                     for self_val, other_val in zip(self_row, other_row)
                 )
             )
+            # fmt: on
         except:
             return False
 
@@ -269,13 +283,16 @@ class Matrix():
         self.matrix[i] = value
 
     def __round__(self, ndigits=None):
+        # fmt: off
         return Matrix([
             [round(num, ndigits) for num in row]
             for row in self.matrix
         ])
+        # fmt: on
 
     def __add__(self, other):
         assert(isinstance(other, Matrix))
+        # fmt: off
         return Matrix([
             [
                 val_self + val_other
@@ -283,6 +300,7 @@ class Matrix():
             ]
             for row_self, row_other in zip(self.matrix, other.matrix)
         ])
+        # fmt: on
 
     def __mul__(self, other):
         """
@@ -293,51 +311,61 @@ class Matrix():
         if isinstance(other, Vector):
             # Vector length == Matrix columns:
             assert(len(other) == self.dimensions()[1])
-
-            return(Vector([
+            # fmt: off
+            return Vector([
                 other.dot(Vector(row))
                 for row in self.matrix
-            ]))
+            ])
+            # fmt: on
 
         if isinstance(other, Matrix):
             # Left matrix columns== Right Matrix row:
             assert(self.dimensions()[1] == other.dimensions()[0])
-
+            # fmt: off
             return Matrix([
                 [
                     Vector(row).dot(
-                        Vector([other_row[col_i]
-                                for other_row in other.matrix])
+                        Vector([
+                            other_row[col_i]
+                            for other_row in other.matrix
+                        ])
                     )
                     for col_i in range(other.dimensions()[1])
                 ]
                 for row in self.matrix
             ])
+            # fmt: on
 
     def __rmul__(self, other):
         assert(is_numeric(other))
+        # fmt: off
         return Matrix([
             [other * val for val in row]
             for row in self.matrix
         ])
+        # fmt: on
 
     def append_right(self, to_append):
         assert(isinstance(to_append, Vector) or isinstance(to_append, Matrix))
         if isinstance(to_append, Vector):
             # Vector length == # rows
             assert(len(to_append) == self.dimensions()[0])
+            # fmt: off
             return Matrix([
                 row + [to_append[i]]
                 for i, row in enumerate(self.matrix)
             ])
+            # fmt: on
 
         else:  # If Matrix:
             # Matrices have the same number of rows
             assert(to_append.dimensions()[0] == self.dimensions()[0])
+            # fmt: off
             return Matrix([
                 row + to_append[i]
                 for i, row in enumerate(self.matrix)
             ])
+            # fmt: on
 
     def convert_to_echelon_form(self, verbose=False):
         """
@@ -477,10 +505,12 @@ class Matrix():
 
         # 4. The original Idenity Matrix we appended is now transformed into the
         #    inverse Matrix
+        # fmt: off
         return Matrix([
             row[-num_rows:]
             for row in CM.matrix
         ])
+        # fmt: on
 
     def determinant(self):
         assert(self.is_square())
@@ -490,6 +520,7 @@ class Matrix():
             return self[0][0]
         else:
             # Recurse to get final determinant:
+            # fmt: off
             return sum([
                 (-1 if c % 2 == 1 else 1)  # 1 if even, -1 if odd
                 * self[0][c]
@@ -505,6 +536,7 @@ class Matrix():
                 ]).determinant()
                 for c in range(self.num_columns)
             ])
+            # fmt: on
 
     def to_orthonormal(self):
         """
@@ -564,10 +596,12 @@ def IdentityMatrix(size):
     assert(isinstance(size, int) and size >= 1)
 
     # Initialize square matrix of all zeroes:
+    # fmt: off
     matrix = Matrix([
         [0] * size
         for _ in range(size)
     ])
+    # fmt: on
 
     # Set diagonal values to 1:
     for i in range(size):
@@ -633,20 +667,27 @@ def page_rank(link_matrix, d=0.85, max_iterations=None):
     """
     assert(isinstance(link_matrix, Matrix))
     assert(link_matrix.is_square())
-    assert(all(
+    # fmt: off
+    assert all(
         sum(column) == 1
         for column in link_matrix.T.matrix
-    ))
+    )
+    # fmt: on
     assert( 0 <= d <= 1)
     assert(max_iterations is None or max_iterations >= 0)
 
     n = link_matrix.num_rows
     i = 0
-    # Build link_matrix with dampening
+    # Build link_matrix with dampening (`d`)
+    # fmt: off
     LM = (
         d * link_matrix
-        + ((1 - d) / n) * Matrix([[1] * n] * n)  # * 1's matrix
+        + (
+            ((1 - d) / n)
+            * Matrix([[1] * n] * n)   # * 1's matrix
+        )
     )
+    # fmt: on
     # Initalize all sites to the same page rank:
     rank_values = Vector([1] * link_matrix.num_rows) / link_matrix.num_rows
     last_rank_values = None
