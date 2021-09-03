@@ -1,18 +1,21 @@
 from math import sqrt, acos, degrees
 from itertools import combinations
 
+
 def is_numeric(object):
     return type(object) == int or type(object) == float
 
-class Vector():
+
+class Vector:
     """
     A vector is an ordered, list of numbers
     """
+
     def __init__(self, *numbers):
         if len(numbers) == 1 and type(numbers[0]) == list:
             numbers = numbers[0]
 
-        assert(all(is_numeric(num) for num in numbers))
+        assert all(is_numeric(num) for num in numbers)
         self.vector = list(numbers)
 
     def __str__(self):
@@ -29,8 +32,10 @@ class Vector():
     def __eq__(self, other):
         try:
             return (
+                # fmt: off
                 len(self) == len(other)
                 and all(x == y for x, y in zip(self, other))
+                # fmt: on
             )
         except:
             return False
@@ -45,17 +50,17 @@ class Vector():
         self.vector[i] = value
 
     def __add__(self, other):
-        assert(isinstance(other, Vector))
-        assert(len(self) == len(other))
+        assert isinstance(other, Vector)
+        assert len(self) == len(other)
         return Vector(*[x + y for x, y in zip(self, other)])
 
     def __sub__(self, other):
-        assert(isinstance(other, Vector))
-        assert(len(self) == len(other))
+        assert isinstance(other, Vector)
+        assert len(self) == len(other)
         return Vector(*[x - y for x, y in zip(self, other)])
 
     def __mul__(self, other):
-        assert(is_numeric(other) or isinstance(other, Vector))
+        assert is_numeric(other) or isinstance(other, Vector)
         if is_numeric(other):
             return Vector(*[other * num for num in self.vector])
         else:
@@ -70,8 +75,10 @@ class Vector():
         return self.__mul__(other)
 
     def __truediv__(self, other):
-        assert(is_numeric(other))
+        assert is_numeric(other)
+        # fmt: off
         return Vector(*[1/other * num for num in self.vector])
+        # fmt: on
 
     def __round__(self, ndigits=None):
         return Vector(*[round(num, ndigits) for num in self.vector])
@@ -83,14 +90,16 @@ class Vector():
         Calculated via the Pythagorean thereom. In that way, this is also the
         distance from the origin to the end of the vector.
         """
+        # fmt: off
         return sqrt(sum([num**2 for num in self.vector]))
+        # fmt: on
 
     def dot_product(self, other):
         """
         "Dot product" or "sum product" of two vectors
         """
-        assert(isinstance(other, Vector))
-        assert(len(self) == len(other))
+        assert isinstance(other, Vector)
+        assert len(self) == len(other)
         return sum([x * y for x, y in zip(self, other)])
 
     def dot(self, other):
@@ -141,10 +150,7 @@ class Vector():
         Note, the scalar projection is the length / magnitude of the projection,
         i.e. how many unit vectors in the direction of b
         """
-        return (
-            self.dot(other) /
-            other.magnitude()
-        )
+        return self.dot(other) / other.magnitude()
 
     def normalize(self):
         """
@@ -166,8 +172,8 @@ class Vector():
         return self.scalar_projection_onto(other) / other.magnitude()
 
     def change_basis(self, *basis_vectors):
-        assert(all([isinstance(vector, Vector) for vector in basis_vectors]))
-        assert(all([len(self) == len(vector) for vector in basis_vectors]))
+        assert all([isinstance(vector, Vector) for vector in basis_vectors])
+        assert all([len(self) == len(vector) for vector in basis_vectors])
         # fmt: off
         assert all([
             # All basis vectors must be orthogonal to eachother
@@ -180,10 +186,12 @@ class Vector():
         ])
         # fmt: on
 
-class Matrix():
+
+class Matrix:
     """
     A matrix is an ordered, "rectangular" list of numbers (with rows and columns)
     """
+
     def __init__(self, *rows_of_numbers):
         if (
             len(rows_of_numbers) == 1
@@ -196,9 +204,9 @@ class Matrix():
             rows_of_numbers = rows_of_numbers[0]
 
         for row in rows_of_numbers:
-            assert(type(row) == list)
-            assert(all(is_numeric(num) for num in row))
-            assert(len(row) == len(rows_of_numbers[0]))
+            assert type(row) == list
+            assert all(is_numeric(num) for num in row)
+            assert len(row) == len(rows_of_numbers[0])
 
         self.matrix = list(rows_of_numbers)
 
@@ -218,10 +226,7 @@ class Matrix():
         Return the matrix dimensions (m x n) / (rows x columns) as a tuple:
         (m, n) / (rows, columns)
         """
-        return (
-            self.num_rows,
-            self.num_columns
-        )
+        return (self.num_rows, self.num_columns)
 
     def is_square(self):
         return self.num_rows == self.num_columns
@@ -291,7 +296,7 @@ class Matrix():
         # fmt: on
 
     def __add__(self, other):
-        assert(isinstance(other, Matrix))
+        assert isinstance(other, Matrix)
         # fmt: off
         return Matrix([
             [
@@ -306,11 +311,11 @@ class Matrix():
         """
         Matrix * Matrix & Matrix * Vector multiplication
         """
-        assert(isinstance(other, Matrix) or isinstance(other, Vector))
+        assert isinstance(other, Matrix) or isinstance(other, Vector)
 
         if isinstance(other, Vector):
             # Vector length == Matrix columns:
-            assert(len(other) == self.dimensions()[1])
+            assert len(other) == self.dimensions()[1]
             # fmt: off
             return Vector([
                 other.dot(Vector(row))
@@ -320,7 +325,7 @@ class Matrix():
 
         if isinstance(other, Matrix):
             # Left matrix columns== Right Matrix row:
-            assert(self.dimensions()[1] == other.dimensions()[0])
+            assert self.dimensions()[1] == other.dimensions()[0]
             # fmt: off
             return Matrix([
                 [
@@ -337,7 +342,7 @@ class Matrix():
             # fmt: on
 
     def __rmul__(self, other):
-        assert(is_numeric(other))
+        assert is_numeric(other)
         # fmt: off
         return Matrix([
             [other * val for val in row]
@@ -346,10 +351,10 @@ class Matrix():
         # fmt: on
 
     def append_right(self, to_append):
-        assert(isinstance(to_append, Vector) or isinstance(to_append, Matrix))
+        assert isinstance(to_append, Vector) or isinstance(to_append, Matrix)
         if isinstance(to_append, Vector):
             # Vector length == # rows
-            assert(len(to_append) == self.dimensions()[0])
+            assert len(to_append) == self.dimensions()[0]
             # fmt: off
             return Matrix([
                 row + [to_append[i]]
@@ -359,7 +364,7 @@ class Matrix():
 
         else:  # If Matrix:
             # Matrices have the same number of rows
-            assert(to_append.dimensions()[0] == self.dimensions()[0])
+            assert to_append.dimensions()[0] == self.dimensions()[0]
             # fmt: off
             return Matrix([
                 row + to_append[i]
@@ -376,7 +381,7 @@ class Matrix():
          [0, 0, 0, 1, ...]]
         """
         num_rows, num_columns = self.dimensions()
-        assert(num_rows <= num_columns)
+        assert num_rows <= num_columns
 
         # For convenience
         M = self  # Matrix
@@ -406,11 +411,13 @@ class Matrix():
                         break
 
                 if verbose:
-                    print(f"After dealing with a zero diagonal value in column {c}:")
+                    print(
+                        f"After dealing with a zero diagonal value in column {c}:"
+                    )
                     print(M)
 
             if M[c][c] == 0:  # If that columns diagonal value is still 0
-                return False # No solution
+                return False  # No solution
 
             # 3. Convert all rows below the row with the diagonal value to have
             #    values of that in column by subtracting the diagonal row from
@@ -421,7 +428,9 @@ class Matrix():
                         M[r] = (Vector(M[r]) - Vector(M[c])).vector
 
             if verbose:
-                print(f"After values in rows below column {c} diagonal to zero:")
+                print(
+                    f"After values in rows below column {c} diagonal to zero:"
+                )
                 print(M)
 
         if verbose:
@@ -461,7 +470,7 @@ class Matrix():
          [0, 0, 1, 0, ...],
          [0, 0, 0, 1, ...]]
         """
-        assert(self.in_echelon_form())
+        assert self.in_echelon_form()
 
         num_rows, num_columns = self.dimensions()
 
@@ -491,7 +500,7 @@ class Matrix():
 
     def invert(self, verbose=False):
         num_rows, num_columns = self.dimensions()
-        assert(num_rows == num_columns)  # Is square matrix
+        assert num_rows == num_columns  # Is square matrix
 
         # 1. Append the Identity Matrix of the same dimensions as self
         combined_matrix = self.append_right(IdentityMatrix(num_rows))
@@ -513,8 +522,8 @@ class Matrix():
         # fmt: on
 
     def determinant(self):
-        assert(self.is_square())
-        assert(self.num_rows > 0)
+        assert self.is_square()
+        assert self.num_rows > 0
 
         if self.num_rows == 1:
             return self[0][0]
@@ -547,7 +556,7 @@ class Matrix():
             return self
         else:
             # Column vectors must be linearly independent:
-            assert(self.determinant() != 0)
+            assert self.determinant() != 0
 
             column_vectors = [Vector(vector) for vector in self.T.matrix]
 
@@ -565,8 +574,9 @@ class Matrix():
                     #    that vector orthogonal to all previously calculated
                     #    basis vectors:
                     for basis_vector in column_vectors[:c]:
-                        vector =\
-                            vector - vector.vector_projection_onto(basis_vector)
+                        vector = vector - vector.vector_projection_onto(
+                            basis_vector
+                        )
 
                     # 3. Finally, normalize the now orthogonal vector to be unit
                     #    length:
@@ -585,6 +595,7 @@ class Matrix():
     # def get_eigenvalues_vectors(self):
     #     pass
 
+
 def IdentityMatrix(size):
     """
     Generate the size rows by size columns Identity Matrix, for example when
@@ -593,7 +604,7 @@ def IdentityMatrix(size):
      [0, 1, 0],
      [0, 0, 1]]
     """
-    assert(isinstance(size, int) and size >= 1)
+    assert isinstance(size, int) and size >= 1
 
     # Initialize square matrix of all zeroes:
     # fmt: off
@@ -608,6 +619,7 @@ def IdentityMatrix(size):
         matrix[i][i] = 1
 
     return matrix
+
 
 def solve_matrix_equation(matrix, vector, verbose=False):
     """
@@ -625,12 +637,12 @@ def solve_matrix_equation(matrix, vector, verbose=False):
        for the equation to have a solution
      - `vector` must be of the same length as the number of rows in `matrix`
     """
-    assert(isinstance(matrix, Matrix))
-    assert(isinstance(vector, Vector))
+    assert isinstance(matrix, Matrix)
+    assert isinstance(vector, Vector)
     num_rows, num_columns = matrix.dimensions()
-    assert(num_rows == num_columns)  # Is square matrix
+    assert num_rows == num_columns  # Is square matrix
     # Check if all `matrix` columns linearly independent?
-    assert(len(vector) == num_rows)
+    assert len(vector) == num_rows
 
     # 1. For ease of computation add `vector` as a column at the end of `matrix`
     combined_matrix = matrix.append_right(vector)
@@ -654,6 +666,7 @@ def solve_matrix_equation(matrix, vector, verbose=False):
     # 4. The values in the final, appended column are the solution
     return Vector([row[num_columns] for row in CM.matrix])
 
+
 def page_rank(link_matrix, d=0.85, max_iterations=None):
     """
     link_matrix = Square (n by n) matrix of the transition probabilities from
@@ -665,16 +678,16 @@ def page_rank(link_matrix, d=0.85, max_iterations=None):
         result is returned. If an exact solution is found is less iterations,
         that solution will be returned and no more iterations will be completed.
     """
-    assert(isinstance(link_matrix, Matrix))
-    assert(link_matrix.is_square())
+    assert isinstance(link_matrix, Matrix)
+    assert link_matrix.is_square()
     # fmt: off
     assert all(
         sum(column) == 1
         for column in link_matrix.T.matrix
     )
     # fmt: on
-    assert( 0 <= d <= 1)
-    assert(max_iterations is None or max_iterations >= 0)
+    assert 0 <= d <= 1
+    assert max_iterations is None or max_iterations >= 0
 
     n = link_matrix.num_rows
     i = 0
