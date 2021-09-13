@@ -36,3 +36,4 @@
  - [OpenAI Spinning Up](https://spinningup.openai.com/en/latest/)
  - [OpenAI Spinning Up - "Right Background"](https://spinningup.openai.com/en/latest/spinningup/spinningup.html#the-right-background)
  - [Mathematics for Machine Learning Textbook](https://mml-book.github.io/)
+ - [An Introduction to Statistical Learning Book](https://web.stanford.edu/~hastie/ISLRv2_website.pdf)

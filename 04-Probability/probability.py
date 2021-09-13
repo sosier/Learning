@@ -1,4 +1,5 @@
 import numpy as np
+from collections import Counter
 
 def multiply_range(from_:int, to:int):
     product = 1
@@ -204,7 +205,6 @@ class Bernoulli():
     def standard_deviation(self):
         return np.sqrt(self.variance())
 
-
 class Binomial():
     def __init__(self, n, p):
         """
@@ -389,7 +389,6 @@ class Geometric():
 
     def standard_deviation(self):
         return np.sqrt(self.variance())
-
 
 class NegativeBinomial():
     def __init__(self, r, p):
@@ -831,4 +830,79 @@ class Exponential():
         return 1 / self.lmbda**2
 
     def standard_deviation(self):
+        return np.sqrt(self.variance())
+
+class Multinomial:
+    def __init__(self, n: int, p: np.array):
+        """
+        Distribution of the counts of number of "things" / "objects" / "items"
+        in k different "categories" / "groups" given n total "things" and some
+        probabilities of an item falling into each "category" (probability
+        vector p)
+
+        Parameters:
+            n = Number of "things" / "objects" / "items" (int)
+            p = Vector of length k where each entry is the probability of a
+                "thing" / "object" falling into the k'th "category" / "group"
+                (vector of floats)
+        """
+        assert(n >= 0 and type(n) == int)
+        assert(p.sum() == 1 and all(p >= 0))
+        self.n = n
+        self.p = p
+        self.k = len(self.p)
+
+    def sample(self, num_samples: int = 1) -> np.array:
+        """
+        num_samples = # of samples to perform (int >= 1)
+        """
+        assert(num_samples >= 1 and type(num_samples) == int)
+
+        counts = np.zeros((num_samples, self.k))
+
+        # Random weighted sample n-times with replacement
+        assignments = np.random.choice(
+            self.k,  # Sample from range(k)
+            size=(num_samples, self.n),
+            replace=True,
+            p=self.p  # Sampling weights
+        )
+
+        for i in range(num_samples):
+            counter = Counter(assignments[i])
+            for j, count in counter.items():
+                counts[i][j] = count
+
+        return counts if num_samples > 1 else counts[0]
+
+    def prob_of(self, n_vector: np.array) -> float:
+        assert(len(n_vector) == self.k)
+
+        if (
+            n_vector.sum() != self.n  # Counts must add to total
+            or any(n_vector % 1)  # Fractional / decimal counts are impossible
+            or any(n_vector < 0)  # Negative counts are impossible
+        ):
+            return 0
+        else:
+            return (
+                factorial(self.n) / (
+                    np.array([factorial(n) for n in n_vector]).prod()
+                )
+                * np.array([p**n for p, n in zip(self.p, n_vector)]).prod()
+            )
+
+    def expected_value(self) -> np.array:
+        """
+        Same as Binomial just with vector p
+        """
+        return self.n * self.p
+
+    def variance(self) -> np.array:
+        """
+        Same as Binomial just with vector p
+        """
+        return self.n * self.p * (1 - self.p)
+
+    def standard_deviation(self) -> np.array:
         return np.sqrt(self.variance())

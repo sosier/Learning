@@ -11,7 +11,7 @@ from probability import (
     probability_two_aces_info_comparison,
     simulate_probability_has_disease_given_positive_medical_test,
     simulate_monty_hall_problem, Bernoulli, Binomial, Hypergeometric, Geometric,
-    NegativeBinomial, Poisson, Uniform, Normal, Exponential
+    NegativeBinomial, Poisson, Uniform, Normal, Exponential, Multinomial
 )
 
 def test_multiply_range():
@@ -567,3 +567,193 @@ def test_Exponential():
     assert(Exponential(1).standard_deviation() == 1)
     assert(Exponential(0.5).standard_deviation() == 2)
     assert(Exponential(2).standard_deviation() == 1/2)
+
+def test_Multinomial():
+    # Test .prob_of()
+    assert Multinomial(n=1, p=np.array([1])).prob_of(np.array([1])) == 1
+    assert Multinomial(n=1, p=np.array([1])).prob_of(np.array([0])) == 0
+    assert (
+        Multinomial(n=1, p=np.array([0.7, 0.3]))
+        .prob_of(np.array([1, 0]))
+        == 0.7
+    )
+    assert (
+        Multinomial(n=1, p=np.array([0.7, 0.3]))
+        .prob_of(np.array([0, 1]))
+        == 0.3
+    )
+    assert Multinomial(n=5, p=np.array([1])).prob_of(np.array([0])) == 0
+    assert Multinomial(n=5, p=np.array([1])).prob_of(np.array([4])) == 0
+    assert Multinomial(n=5, p=np.array([1])).prob_of(np.array([5])) == 1
+    assert Multinomial(n=5, p=np.array([1])).prob_of(np.array([6])) == 0
+    assert (
+        Multinomial(n=3, p=np.array([0.5, 0.5]))
+        .prob_of(np.array([0, 3]))
+        == 1/8
+    )
+    assert (
+        Multinomial(n=3, p=np.array([0.5, 0.5]))
+        .prob_of(np.array([1, 2]))
+        == 3/8
+    )
+    assert (
+        Multinomial(n=3, p=np.array([0.5, 0.5]))
+        .prob_of(np.array([2, 1]))
+        == 3/8
+    )
+    assert (
+        Multinomial(n=3, p=np.array([0.5, 0.5]))
+        .prob_of(np.array([3, 0]))
+        == 1/8
+    )
+    assert (
+        Multinomial(n=3, p=np.array([1/3, 1/3, 1/3]))
+        .prob_of(np.array([0, 0, 3]))
+        == Multinomial(n=3, p=np.array([1/3, 1/3, 1/3]))
+        .prob_of(np.array([3, 0, 0]))
+        == Multinomial(n=3, p=np.array([1/3, 1/3, 1/3]))
+        .prob_of(np.array([0, 3, 0]))
+        and
+        abs(
+            Multinomial(n=3, p=np.array([1/3, 1/3, 1/3]))
+            .prob_of(np.array([0, 0, 3]))
+            - 1/27
+        ) <= 0.000000001
+    )
+    assert (
+        Multinomial(n=3, p=np.array([1/3, 1/3, 1/3]))
+        .prob_of(np.array([1, 1, 1]))
+        == 6/27
+    )
+    assert (
+        Multinomial(n=3, p=np.array([1/3, 1/3, 1/3]))
+        .prob_of(np.array([2, 1, 0]))
+        == Multinomial(n=3, p=np.array([1/3, 1/3, 1/3]))
+        .prob_of(np.array([2, 0, 1]))
+        == Multinomial(n=3, p=np.array([1/3, 1/3, 1/3]))
+        .prob_of(np.array([0, 2, 1]))
+        == Multinomial(n=3, p=np.array([1/3, 1/3, 1/3]))
+        .prob_of(np.array([1, 2, 0]))
+        == Multinomial(n=3, p=np.array([1/3, 1/3, 1/3]))
+        .prob_of(np.array([1, 0, 2]))
+        == Multinomial(n=3, p=np.array([1/3, 1/3, 1/3]))
+        .prob_of(np.array([0, 1, 2]))
+        == 3/27
+    )
+    assert (
+        Multinomial(n=3, p=np.array([1/3, 1/3, 1/3]))
+        .prob_of(np.array([1, 1, 2]))
+        == Multinomial(n=3, p=np.array([1/3, 1/3, 1/3]))
+        .prob_of(np.array([1, -1, 2]))
+        == Multinomial(n=3, p=np.array([1/3, 1/3, 1/3]))
+        .prob_of(np.array([0.5, 0.5, 2]))
+        == 0
+    )
+
+    # Test .sample()
+    assert Multinomial(n=1, p=np.array([1])).sample() == np.array([1])
+    assert all(Multinomial(n=1, p=np.array([1])).sample(10) == np.array([1]))
+    assert Multinomial(n=5, p=np.array([1])).sample() == np.array([5])
+    assert all(Multinomial(n=5, p=np.array([1])).sample(10) == np.array([5]))
+
+    np.random.seed(12345)  # Something up with the random seeds here...
+    assert np.array_equal(
+        Multinomial(n=1, p=np.array([0.7, 0.3])).sample(),
+        np.array([0, 1])
+    )
+    assert np.array_equal(
+        Multinomial(n=1, p=np.array([0.7, 0.3])).sample(3),
+        np.array([
+            [1, 0],
+            [1, 0],
+            [1, 0]
+        ])
+    )
+    assert np.array_equal(
+        Multinomial(n=3, p=np.array([0.5, 0.5])).sample(),
+        np.array([0, 3])
+    )
+    assert np.array_equal(
+        Multinomial(n=3, p=np.array([0.5, 0.5])).sample(3),
+        np.array([
+            [0, 3],
+            [1, 2],
+            [2, 1]
+        ])
+    )
+    assert np.array_equal(
+        Multinomial(n=3, p=np.array([1/4, 1/4, 1/2])).sample(),
+        np.array([0, 0, 3])
+    )
+    assert np.array_equal(
+        Multinomial(n=3, p=np.array([1/4, 1/4, 1/2])).sample(3),
+        np.array([
+            [0, 0, 3],
+            [0, 3, 0],
+            [0, 0, 3]
+        ])
+    )
+
+    # Test .expected_value()
+    assert Multinomial(n=1, p=np.array([1])).expected_value() == 1
+    assert Multinomial(n=8, p=np.array([1])).expected_value() == 8
+    assert np.array_equal(
+        Multinomial(n=1, p=np.array([0.7, 0.3])).expected_value(),
+        np.array([0.7, 0.3])
+    )
+    assert np.array_equal(
+        Multinomial(n=5, p=np.array([0.7, 0.3])).expected_value(),
+        np.array([3.5, 1.5])
+    )
+    assert np.array_equal(
+        Multinomial(n=1, p=np.array([1/4, 1/4, 1/2])).expected_value(),
+        np.array([1/4, 1/4, 1/2])
+    )
+    assert np.array_equal(
+        Multinomial(n=3, p=np.array([1/4, 1/4, 1/2])).expected_value(),
+        np.array([3/4, 3/4, 3/2])
+    )
+
+    # Test .variance()
+    assert Multinomial(n=1, p=np.array([1])).variance() == 0
+    assert Multinomial(n=8, p=np.array([1])).variance() == 0
+    assert np.array_equal(
+        Multinomial(n=1, p=np.array([4/10, 6/10])).variance(),
+        np.array([0.24, 0.24])
+    )
+    assert all(
+        np.abs(
+            Multinomial(n=5, p=np.array([4/10, 6/10])).variance()
+            - np.array([1.2, 1.2])
+        ) < 0.000000000001
+    )
+    assert np.array_equal(
+        Multinomial(n=1, p=np.array([1/4, 1/4, 1/2])).variance(),
+        np.array([3/16, 3/16, 1/4])
+    )
+    assert np.array_equal(
+        Multinomial(n=3, p=np.array([1/4, 1/4, 1/2])).variance(),
+        np.array([9/16, 9/16, 3/4])
+    )
+
+    # Test .standard_deviation()
+    assert Multinomial(n=1, p=np.array([1])).standard_deviation() == 0
+    assert Multinomial(n=8, p=np.array([1])).standard_deviation() == 0
+    assert np.array_equal(
+        Multinomial(n=1, p=np.array([4/10, 6/10])).standard_deviation(),
+        np.sqrt(np.array([0.24, 0.24]))
+    )
+    assert all(
+        np.abs(
+            Multinomial(n=5, p=np.array([4/10, 6/10])).standard_deviation()
+            - np.sqrt(np.array([1.2, 1.2]))
+        ) < 0.000000000001
+    )
+    assert np.array_equal(
+        Multinomial(n=1, p=np.array([1/4, 1/4, 1/2])).standard_deviation(),
+        np.sqrt(np.array([3/16, 3/16, 1/4]))
+    )
+    assert np.array_equal(
+        Multinomial(n=3, p=np.array([1/4, 1/4, 1/2])).standard_deviation(),
+        np.sqrt(np.array([9/16, 9/16, 3/4]))
+    )
