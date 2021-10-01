@@ -11,7 +11,8 @@ from probability import (
     probability_two_aces_info_comparison,
     simulate_probability_has_disease_given_positive_medical_test,
     simulate_monty_hall_problem, Bernoulli, Binomial, Hypergeometric, Geometric,
-    NegativeBinomial, Poisson, Uniform, Normal, Exponential, Multinomial
+    NegativeBinomial, Poisson, Uniform, Normal, Exponential, Multinomial,
+    Cauchy
 )
 
 def test_multiply_range():
@@ -757,3 +758,61 @@ def test_Multinomial():
         Multinomial(n=3, p=np.array([1/4, 1/4, 1/2])).standard_deviation(),
         np.sqrt(np.array([9/16, 9/16, 3/4]))
     )
+
+def test_Cauchy():
+    # Test .prob_of()
+    assert Cauchy().prob_of() == 1
+    assert Cauchy(0.789, 1237).prob_of() == 1
+    assert Cauchy().prob_of(-1, 1) == 0.5
+    assert Cauchy(location=5).prob_of(4, 6) == 0.5
+    assert Cauchy(scale=2).prob_of(-2, 2) == 0.5
+    assert Cauchy(location=5, scale=2).prob_of(3, 7) == 0.5
+    assert (
+        round(Cauchy().prob_of(-np.sqrt(3), np.sqrt(3)), 12)
+        == round(2/3, 12)
+    )
+    assert (
+        round(
+            Cauchy(location=2, scale=3).prob_of(
+                3 * -np.sqrt(3) + 2,
+                3 * np.sqrt(3) + 2
+            ),
+            12
+        ) == round(2/3, 12)
+    )
+
+    # Test .sample()
+    np.random.seed(12345)
+    assert Cauchy().sample() == 0.05380274470608822
+    assert Cauchy(location=0, scale=10).sample() == -3.085580941444549
+    assert Cauchy(location=10, scale=1).sample() == 12.71065603273782
+    assert Cauchy(location=10, scale=10).sample() == 10.736556990198396
+
+    assert np.allclose(
+        Cauchy().sample(3),
+        np.array([0.42659502, 1.78396705, 0.19468154])
+    )
+    assert np.allclose(
+        Cauchy(location=0, scale=10).sample(3),
+        np.array([-230.02239651, 3.28222477, 20.19808807])
+    )
+    assert np.allclose(
+        Cauchy(location=10, scale=1).sample(3),
+        np.array([9.02117213, 10.03302647, 11.46422113])
+    )
+    assert np.allclose(
+        Cauchy(location=10, scale=10).sample(3),
+        np.array([-27.61098847,   7.27303729,  10.02623666])
+    )
+
+    # Test .expected_value()
+    assert np.isnan(Cauchy().expected_value())
+    assert np.isnan(Cauchy(-10, 11.37).expected_value())
+
+    # Test .variance()
+    assert np.isnan(Cauchy().variance())
+    assert np.isnan(Cauchy(-10, 11.37).variance())
+
+    # Test.standard_deviation()
+    assert np.isnan(Cauchy().standard_deviation())
+    assert np.isnan(Cauchy(-10, 11.37).standard_deviation())

@@ -906,3 +906,147 @@ class Multinomial:
 
     def standard_deviation(self) -> np.array:
         return np.sqrt(self.variance())
+
+class Cauchy():
+    def __init__(self, location: float = 0., scale: float = 1.):
+        """
+        The distribution of the ratio of two independent normally distributed
+        random variables
+
+        location = roughly the median of the resulting distribution
+        scale = roughly the standard_deviation of the resulting distribution
+        """
+        assert(type(location * 1.0) == float)
+        assert(type(scale * 1.0) == float)
+        assert(scale >= 0)
+        self.location = location
+        self.scale = scale
+
+    def sample(self, num_samples=1, **kwargs):
+        """
+        num_samples = # of samples to perform (int >= 1)
+        kwargs = passed through to Normal(0, 1).sample()
+        """
+        return (
+            Normal(0, 1).sample(num_samples, **kwargs)
+            / Normal(0, 1).sample(num_samples, **kwargs)
+        ) * self.scale + self.location
+
+    def _CDF(self, x: float):
+        """
+        CDF Derivation:
+         1. Let X, Y be two independent normally distributed random variables
+            with mean 0, and variance 1
+         2. Cauchy = X / Y
+         3. CDF = P(X / Y <= t)
+                = P(X / |Y| <= t)   ...by symmetry of the normal
+                = P(X <= t * |Y|)
+                = integral_-inf_to_inf(
+                    integral_-inf_to_t*|Y|(
+                        (1 / sqrt(2 * pi))
+                        * e^(-x^2 / 2))
+                        * (1 / sqrt(2 * pi))
+                        * e^(-y^2 / 2))
+                        dx
+                    )
+                    dy
+                  )
+                = (1 / sqrt(2 * pi)) * integral_-inf_to_inf(
+                    integral_-inf_to_t*|Y|(
+                        (1 / sqrt(2 * pi))
+                        * e^(-x^2 / 2))
+                        * e^(-y^2 / 2))
+                        dx
+                    )
+                    dy
+                  )
+                = (1 / sqrt(2 * pi)) * integral_-inf_to_inf(
+                    e^(-y^2 / 2))
+                    * integral_-inf_to_t*|Y|(
+                        (1 / sqrt(2 * pi))
+                        * e^(-x^2 / 2))
+                        dx
+                    )
+                    dy
+                  )
+                = (1 / sqrt(2 * pi)) * integral_-inf_to_inf(
+                    e^(-y^2 / 2))
+                    * CDF_normal(t*|Y|)
+                    dy
+                  )
+                ...simplify using symmetry and evenness of the normal:
+                = (2 / sqrt(2 * pi)) * integral_0_to_inf(
+                    e^(-y^2 / 2))
+                    * CDF_normal(t*y)
+                    dy
+                  )
+         4. Since above integral is not directly solvable, take derivative to
+            get Cauchy PDF first:
+            PDF = dF/dt
+                = (2 / sqrt(2 * pi)) * integral_0_to_inf(
+                    e^(-y^2 / 2))
+                    * (1 / sqrt(2 * pi))
+                    * e^(-t^2*y^2 / 2))
+                    dy
+                  )
+                = (2 / sqrt(2 * pi))
+                  * (1 / sqrt(2 * pi))
+                  * integral_0_to_inf(
+                    * e^(-(1 + t^2)*y^2 / 2))
+                    dy
+                  )
+                = (2 / 2 * pi)
+                  * integral_0_to_inf(
+                    * e^(-(1 + t^2)*y^2 / 2))
+                    dy
+                  )
+                = (1 / pi)
+                  * integral_0_to_inf(
+                    * e^(-(1 + t^2)*y^2 / 2))
+                    dy
+                  )
+                = (1 / pi)
+                  * ( e^(-(1 + t^2)*y^2 / 2)) * -1/(1 + t^2) |0 to inf )
+                = (1 / pi)
+                  * (0 - -1/(1 + t^2))
+                = (1 / pi)
+                  * (1/(1 + t^2))
+         5. Integrate to get CDF:
+            CDF = integral_-inf_to_t(PDF(t) dt)
+                = integral_-inf_to_t(
+                    (1 / pi)
+                    * (1/(1 + t^2))
+                    dt
+                )
+                = (1 / pi) * integral_-inf_to_t(
+                    (1/(1 + t^2))
+                    dt
+                )
+                = (1 / pi) * (arctan(t) |-inf to t)
+                = (1 / pi) * (arctan(t) - arctan(-inf))
+                = (1 / pi) * (arctan(t) - -pi/2)
+                = (1 / pi) * (arctan(t) + pi/2)
+                = 1/2 + arctan(t) / pi
+        """
+        # Standardize:
+        x = (x - self.location) / self.scale
+
+        # Standard CDF:
+        return 1/2 + np.arctan(x) / np.pi
+
+    def prob_of(self, start=-np.inf, end=np.inf):
+        assert(start <= end)
+
+        if start == -np.inf and end == np.inf:
+            return 1
+        else:
+            return self._CDF(end) - self._CDF(start)
+
+    def expected_value(self):
+        return np.nan  # Undefined for Cauchy
+
+    def variance(self):
+        return np.nan  # Undefined for Cauchy
+
+    def standard_deviation(self):
+        return np.nan  # Undefined for Cauchy
