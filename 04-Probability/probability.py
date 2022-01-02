@@ -255,6 +255,13 @@ class Binomial():
 class Hypergeometric():
     def __init__(self, N, K, n):
         """
+        Hypergeometric = Distribution of the probability of `k` successes
+            (random draws for which the object drawn has a specified feature) in
+            `n` draws, **without replacement**, from a finite population of size
+            `N` that contains exactly `K` objects with that feature, wherein
+            each draw is either a success or a failure.
+        (Source: https://en.wikipedia.org/wiki/Hypergeometric_distribution)
+
         N = Size of overall population (int >= 0)
         K = Total size of "success" draws (int >=0 and <= N)
         n = # of samples without replacement (int >=0 and <= N)
@@ -267,6 +274,9 @@ class Hypergeometric():
 
         assert(0 <= n <= self.N and type(n) == int)
         self.n = n
+
+        self.p = self.K / self.N if self.N else 0
+        self.q = 1 - self.p
 
         self.data_set_for_sampling = np.append(
             np.ones(self.K),
@@ -300,7 +310,102 @@ class Hypergeometric():
         return self.n * (self.K/ self.N)
 
     def variance(self):
-        pass
+        """
+        PROOF:
+
+        Let:
+            X = Hypergeometric(N, K, n)
+            p = K / N
+            q = 1 - p
+
+        X = X[1] + X[2] + ... + X[n] where X[i] is an indicator random variable
+            (0 or 1) that a that a "success" was picked in the i'th position (1)
+            or not (0)
+
+        Given this we can find the variance of X using:
+        Var(X) = Var(X[1] + X[2] + ... + X[n])
+               = Cov(X[1] + X[2] + ... + X[n], X[1] + X[2] + ... + X[n])
+               = Cov(X[1], X[1]) + Cov(X[1], X[2]) + ... + Cov(X[1], X[n])
+                 + Cov(X[2], X[1]) + Cov(X[2], X[2]) + ... + Cov(X[2], X[n])
+                 + ... + Cov(X[n], X[n-1]) + Cov(X[n], X[n])
+               = Var(X[1]) + Cov(X[1], X[2]) + ... + Cov(X[1], X[n])
+                 + Cov(X[2], X[1]) + Var(X[2]) + ... + Cov(X[2], X[n])
+                 + ... + Cov(X[n], X[n-1]) + Var(X[n])
+               = n * Var(X[i]) + n * (n - 1) * Cov(X[i], X[j])    (where i != j)
+
+        X[i] (given no information about any X[j] where i != j) is Bernoulli(p)
+        so:
+            E(X[i]) = E(X[i]**2) = p
+            Var(X[i]) = p * q
+                From:
+                Var(X[i]) = E(X[i]**2) - E(X[i])**2
+                          = p - p**2
+                          = p * (1 - p)
+                          = p * q
+
+        X[i] and X[j] where i != j are NOT independent, e.g. if one "success" is
+        "taken" by X[i] the odds of X[j] being a success are diminished. As
+        such, we need to calculate Cov(X[i], X[j]) where i != j. Order of when
+        a "success" is picked is irrelevant, so as long as i and j are in the
+        range [1,  n] this applies to all i != j.
+
+        Cov(X[i], X[j]) = E(X[i] * X[j]) - E(X[i]) * E(X[j])
+                        = E(X[i] * X[j]) - p * p
+                        = E(X[i] * X[j]) - p**2
+
+        E(X[i] * X[j]) = 0 * 0 * P(X[i] = 0, X[j] = 0)
+                         + 1 * 0 * P(X[i] = 1, X[j] = 0)
+                         + 0 * 1 * P(X[i] = 0, X[j] = 1)
+                         + 1 * 1 * P(X[i] = 1, X[j] = 1)
+                       = 1 * 1 * P(X[i] = 1, X[j] = 1)
+                       = P(X[i] = 1, X[j] = 1)
+                       = P(X[i] = 1) * P(X[j] = 1 | X[i] = 1)
+                       = p * (K - 1) / (N - 1)
+
+        Cov(X[i], X[j]) = E(X[i] * X[j]) - p**2
+                        = p * (K - 1) / (N - 1) - p**2
+                        = p * ((K - 1) / (N - 1) - p)
+                        = p * ((K - 1) / (N - 1) - K / N)
+                        = p * (
+                            (N * (K - 1) - (N - 1) * K)
+                            / (N * (N - 1))
+                        )
+                        = p * (
+                            (N * K - N - N * K +  K)
+                            / (N * (N - 1))
+                        )
+                        = p * (
+                            (K - N)
+                            / (N * (N - 1))
+                        )
+                        = -p * (
+                            (N - K)
+                            / (N * (N - 1))
+                        )
+                        = -1 / (N - 1) * p * ((N - K) / N)
+                        = -1 / (N - 1) * p * (1 - p)
+                        = -1 / (N - 1) * p * q
+
+        Var(X) = n * Var(X[i]) + n * (n - 1) * Cov(X[i], X[j])    (where i != j)
+               = n * p * q + n * (n - 1) * -1 / (N - 1) * p * q
+               = n * p * q * (1 + (n - 1) * -1 / (N - 1))
+               = n * p * q * (1 - (n - 1) / (N - 1))
+               = n * p * q * ((N - 1) / (N - 1) - (n - 1) / (N - 1))
+               = n * p * q * (
+                    ((N - 1) - (n - 1))
+                    / (N - 1)
+                 )
+               = n * p * q * (
+                    (N - 1 - n + 1)
+                    / (N - 1)
+                )
+              = n * p * q * (
+                   (N - n)
+                   / (N - 1)
+               )
+             = n * p * q * (N - n) / (N - 1)
+        """
+        return self.n * self.p * self.q * ((self.N - self.n)/(self.N - 1))
 
     def standard_deviation(self):
         return np.sqrt(self.variance())

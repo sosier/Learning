@@ -280,6 +280,22 @@ def test_Hypergeometric():
     assert(Hypergeometric(N=3, K=3, n=2).expected_value() == 2)
     assert(Hypergeometric(N=3, K=3, n=1).expected_value() == 1)
 
+    # Test .variance()
+    assert(abs(Hypergeometric(N=3, K=2, n=2).variance() - 2/9) < 0.00000001)
+    assert(abs(Hypergeometric(N=3, K=2, n=1).variance() - 2/9) < 0.00000001)
+    assert(Hypergeometric(N=3, K=2, n=3).variance() == 0)
+    assert(Hypergeometric(N=3, K=0, n=2).variance() == 0)
+    assert(Hypergeometric(N=3, K=3, n=2).variance() == 0)
+    assert(Hypergeometric(N=3, K=3, n=1).variance() == 0)
+
+    # Test .standard_deviation()
+    assert(Hypergeometric(N=3, K=2, n=2).standard_deviation() == np.sqrt(2/9))
+    assert(Hypergeometric(N=3, K=2, n=1).standard_deviation() == np.sqrt(2/9))
+    assert(Hypergeometric(N=3, K=2, n=3).standard_deviation() == 0)
+    assert(Hypergeometric(N=3, K=0, n=2).standard_deviation() == 0)
+    assert(Hypergeometric(N=3, K=3, n=2).standard_deviation() == 0)
+    assert(Hypergeometric(N=3, K=3, n=1).standard_deviation() == 0)
+
 def test_Geometric():
     # Test .prob_of()
     assert(Geometric(p=0).prob_of(12) == 0)
