@@ -171,6 +171,9 @@ class Bernoulli():
         return result if n > 1 else result[0]
 
     def prob_of(self, k):
+        """
+        By definition
+        """
         if k not in [0, 1]:
             return 0
         elif k == 1:
@@ -179,6 +182,15 @@ class Bernoulli():
             return self.q
 
     def expected_value(self):
+        """
+        PROOF:
+        X ~ Bernoulli(p)
+        E(X) = sum([x * P(X = x) for all x])
+          x can only be 0 or 1 so:
+             = 0 * P(X = 0) + 1 * P(X = 1)
+             = 0 * q + 1 * p
+             = p
+        """
         return self.p
 
     def variance(self):
@@ -208,6 +220,8 @@ class Bernoulli():
 class Binomial():
     def __init__(self, n, p):
         """
+        Sum of n i.i.d. Bernoulli(p) trials
+
         n = # of trials
 
         For any given trial:
@@ -229,12 +243,34 @@ class Binomial():
         return result if num_samples > 1 else result[0]
 
     def prob_of(self, k):
+        """
+        Derived from n_choose_k(n, k) possible orderings of k "successes" and
+        n - k "failures" across n total trials:
+            n_choose_k(n, k)
+        ...times the probability of any ordering of with exactly k successes and
+        n - k failures:
+            p**k * q**(n - k)
+        = n_choose_k(n, k) * p**k * q**(n - k)
+        """
         if k < 0 or k > self.n or type(k) != int:
             return 0
         else:
             return n_choose_k(self.n, k) * self.p**k * self.q**(self.n - k)
 
     def expected_value(self):
+        """
+        PROOF:
+        X ~ Binomial(n, p)
+
+        By definition:
+        X = X[1] + X[2] + ... + X[n] where X[i] ~ Bernoulli(p)
+
+        E(X) = E(X[1] + X[2] + ... + X[n])
+             = E(X[1]) + E(X[2]) + ... + E(X[n])
+          Per Binomial definition all X[i] are i.i.d. so...
+             = n * E(X[i])
+             = n * p
+        """
         return self.n * self.p
 
     def variance(self):
@@ -298,6 +334,21 @@ class Hypergeometric():
         return result if num_samples > 1 else result[0]
 
     def prob_of(self, k):
+        """
+        Derived from ways to draw k successes without replacement out of K total
+        possible successes:
+            n_choose_k(K, k)
+
+        ...times ways to draw n - k failures without replacement out of N - K
+        total possible failures:
+            n_choose_k(N - K, n - k)
+
+        ...divided by the total number of ways to draw n "objects" (succeses or
+        failures) from N total objects:
+            n_choose_k(N, n)
+
+        = n_choose_k(K, k) * n_choose_k(N - K, n - k) / n_choose_k(N, n)
+        """
         if k < 0 or k > self.K or k > self.n or type(k) != int:
             return 0
         else:
@@ -307,6 +358,30 @@ class Hypergeometric():
             )
 
     def expected_value(self):
+        """
+        PROOF:
+
+        Let:
+            X ~ Hypergeometric(N, K, n)
+            p = K / N
+            q = 1 - p
+
+        X = X[1] + X[2] + ... + X[n] where X[i] is an indicator random variable
+            (0 or 1) that a that a "success" was picked in the i'th position (1)
+            or not (0)
+
+        Given this we can find E(X) using:
+        E(X) = E(X[1] + X[2] + ... + X[n])
+             = E(X[1]) + E(X[2]) + ... + E(X[n])
+             = n * E(X[i])
+
+        X[i] (given no information about any X[j] where i != j) is Bernoulli(p)
+        so:
+            E(X[i]) = E(X[i]**2) = p
+
+        E(X) = n * p
+             = n * K / N
+        """
         return self.n * (self.K/ self.N)
 
     def variance(self):
@@ -314,7 +389,7 @@ class Hypergeometric():
         PROOF:
 
         Let:
-            X = Hypergeometric(N, K, n)
+            X ~ Hypergeometric(N, K, n)
             p = K / N
             q = 1 - p
 
@@ -447,6 +522,11 @@ class Geometric():
         return result if num_samples > 1 else result[0]
 
     def prob_of(self, k):
+        """
+        Derived from the probability of k failures (q**k) and then 1 success (p)
+         = q**k * p**1
+         = q**k * p
+        """
         if k < 0 or type(k) != int:
             return 0
         elif k == 0 and self.p == 1:
@@ -455,6 +535,30 @@ class Geometric():
             return self.q**k * self.p
 
     def expected_value(self):
+        """
+        PROOF:
+
+        X ~ Geometric(p)
+        E(X) = sum_to_infinity([x * P(X = x)])
+             = sum_to_infinity([x * q**x * p])
+             = p * sum_to_infinity([x * q**x])
+             = p * sum_to_infinity([x * q**x-1 * q])
+             = p * q * sum_to_infinity([x * q**x-1])
+
+        sum_to_infinity([x * q**x-1]) = derivative of geometric series
+            sum_to_infinity([q**x]) with respect to q (d/dq)
+
+        sum_to_infinity([q**x]) = 1 / (1 - q)                      (for |q| < 1)
+        d/dq sum_to_infinity([q**x]) = d/dq 1 / (1 - q)
+        sum_to_infinity([x * q**x-1]) = -1 * (1 - q)**-2 * -1
+                                      = (1 - q)**-2
+                                      = p**-2
+
+        E(X) = p * q * sum_to_infinity([x * q**x-1])
+             = p * q * p**-2
+             = q * p**-1
+             = q / p
+        """
         if self.p == 0:
             return np.inf
         else:
@@ -544,6 +648,14 @@ class NegativeBinomial():
         return result if num_samples > 1 else result[0]
 
     def prob_of(self, n):
+        """
+        Derived from probability of r success (p**r) and n failures (q**n)
+        multiplied by the number of possible ways to get ("arrange") r - 1
+        success in sequence of n + r - 1 trials (n_chose_k(n + r - 1, r - 1)).
+        Note, it is r - 1 because last trial is always success, while other
+        trials can be in any order.
+         = n_chose_k(n + r - 1, r - 1) * p**r * q**n
+        """
         if self.p == 0 and n == np.inf:
             return 1
         elif n < 0 or type(n) != int:
@@ -563,6 +675,15 @@ class NegativeBinomial():
             )
 
     def expected_value(self):
+        """
+        Derived from sum of r Geometric distributions in order:
+        X ~ NegativeBinomial(r, p)
+        X = X[1] + X[2] + ... + X[r]    where X[i] ~ Geometric(p)
+        E(X) = E(X[1] + X[2] + ... + X[r])
+             = E(X[1]) + E(X[2]) + ... + E(X[r])
+             = r * E(X[i])
+             = r * q / p
+        """
         if self.r == 0 or self.p == 1:
             return 0
         elif self.p == 0:
@@ -571,7 +692,41 @@ class NegativeBinomial():
             return self.r * self.q / self.p
 
     def variance(self):
-        pass
+        """
+        Derived from sum of r Geometric distributions in order:
+        X ~ NegativeBinomial(r, p)
+        X = X[1] + X[2] + ... + X[r]    where X[i] ~ Geometric(p)
+
+        Var(X) = Var(X[1] + X[2] + ... + X[r])
+               = Cov(X[1] + X[2] + ... + X[r], X[1] + X[2] + ... + X[r])
+               = Cov(X[1], X[1]) + Cov(X[1], X[2]) + ... + Cov(X[1], X[r])
+                 + Cov(X[2], X[1]) + Cov(X[2], X[2]) + ... + Cov(X[2], X[r])
+                 + ... + Cov(X[r], X[r-1]) + Cov(X[r], X[r])
+              = Var(X[1]) + Cov(X[1], X[2]) + ... + Cov(X[1], X[r])
+                + Cov(X[2], X[1]) + Var(X[2]) + ... + Cov(X[2], X[r])
+                + ... + Cov(X[r], X[r-1]) + Var(X[r])
+              = r * Var(X[i]) + r * (r - 1) * Cov(X[i], X[j])     (where i != j)
+
+        Because X[i] ~ Geometric(p):
+            Var(X[i]) = q / p**2            (for proof see Geometric.variance())
+
+        Because NegativeBinomial assumes i.i.d. Bernoulli(p) trials, the
+        Geometric distributions X[i] are also i.i.d because they are comprised
+        of these i.i.d. trials. Or put more intuitively, no previous Geometric
+        trials have any impact on the outcome of the current Geometric trial. As
+        such:
+            Cov(X[i], X[j]) = 0
+
+        Var(X) = r * Var(X[i]) + r * (r - 1) * Cov(X[i], X[j])    (where i != j)
+               = r * q / p**2 + r * (r - 1) * 0
+               = r * q / p**2
+        """
+        if self.r == 0 or self.p == 1:
+            return 0
+        elif self.p == 0:
+            return np.inf
+        else:
+            return self.r * self.q / self.p**2
 
     def standard_deviation(self):
         return np.sqrt(self.variance())

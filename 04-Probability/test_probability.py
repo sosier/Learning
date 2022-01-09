@@ -396,6 +396,26 @@ def test_NegativeBinomial():
     assert(NegativeBinomial(r=1, p=0.25).expected_value() == 3)
     assert(NegativeBinomial(r=2, p=0.25).expected_value() == 6)
 
+    # Test .variance()
+    assert(NegativeBinomial(r=0, p=0).variance() == 0)
+    assert(NegativeBinomial(r=1, p=0).variance() == np.inf)
+    assert(NegativeBinomial(r=1, p=1).variance() == 0)
+    assert(NegativeBinomial(r=2, p=1).variance() == 0)
+    assert(NegativeBinomial(r=1, p=0.5).variance() == 2)
+    assert(NegativeBinomial(r=2, p=0.5).variance() == 4)
+    assert(NegativeBinomial(r=1, p=0.25).variance() == 12)
+    assert(NegativeBinomial(r=2, p=0.25).variance() == 24)
+
+    # Test .standard_deviation()
+    assert(NegativeBinomial(r=0, p=0).standard_deviation() == 0)
+    assert(NegativeBinomial(r=1, p=0).standard_deviation() == np.inf)
+    assert(NegativeBinomial(r=1, p=1).standard_deviation() == 0)
+    assert(NegativeBinomial(r=2, p=1).standard_deviation() == 0)
+    assert(NegativeBinomial(r=1, p=0.5).standard_deviation() == np.sqrt(2))
+    assert(NegativeBinomial(r=2, p=0.5).standard_deviation() == 2)
+    assert(NegativeBinomial(r=1, p=0.25).standard_deviation() == np.sqrt(12))
+    assert(NegativeBinomial(r=2, p=0.25).standard_deviation() == np.sqrt(24))
+
 def test_Poisson():
     # Test .prob_of()
     assert(Poisson(lmbda=0).prob_of(0) == 1)
