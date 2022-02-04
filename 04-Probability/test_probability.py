@@ -484,7 +484,7 @@ def test_Uniform():
     ))
     assert(np.allclose(
         Uniform(2.3, 11.0).sample(3),
-        np.array([10.69127632,  7.98264074,  8.81548775])
+        np.array([10.69127632, 7.98264074, 8.81548775])
     ))
 
     # Test .expected_value()
@@ -523,26 +523,26 @@ def test_Normal():
 
     # Test .sample()
     np.random.seed(12345)
-    assert(Normal(0, 1).sample() == -0.09224845063973232)
-    assert(Normal(0, 10).sample() == -5.421939275342601)
-    assert(Normal(10, 1).sample() == 10.835346291858222)
-    assert(Normal(10, 10).sample() == 1.4388992952132398)
+    assert(Normal(0, 1).sample() == 2.106353682693583)
+    assert(Normal(0, 10).sample() == 1.9345270053213395)
+    assert(Normal(10, 1).sample() == 9.26836169058641)
+    assert(Normal(10, 10).sample() == 3.2945996416600973)
 
     assert(np.allclose(
         Normal(0, 1).sample(3),
-        np.array([1.32331351, -0.62573778,  1.23488571])
+        np.array([-0.40020881, 0.07670713, 1.02906135])
     ))
     assert(np.allclose(
         Normal(0, 10).sample(3),
-        np.array([3.08668587,  2.95486075, -0.26587742])
+        np.array([-1.91680563, -1.01832205, -5.68292916])
     ))
     assert(np.allclose(
         Normal(10, 1).sample(3),
-        np.array([9.97228541, 9.95699953, 9.50904269])
+        np.array([11.27553437, 10.58858573, 8.88631439])
     ))
     assert(np.allclose(
         Normal(10, 10).sample(3),
-        np.array([8.6934384 , 11.23636856,  9.22880499])
+        np.array([18.89409371, 10.79808548, 4.68394385])
     ))
 
     # Test .expected_value()
@@ -819,26 +819,26 @@ def test_Cauchy():
 
     # Test .sample()
     np.random.seed(12345)
-    assert Cauchy().sample() == 0.05380274470608822
-    assert Cauchy(location=0, scale=10).sample() == -3.085580941444549
-    assert Cauchy(location=10, scale=1).sample() == 12.71065603273782
-    assert Cauchy(location=10, scale=10).sample() == 10.736556990198396
+    assert Cauchy().sample() == 3.443154412873596
+    assert Cauchy(location=0, scale=10).sample() == 3.4504181071072697
+    assert Cauchy(location=10, scale=1).sample() == 13.420477789670208
+    assert Cauchy(location=10, scale=10).sample() == 8.851760549075378
 
     assert np.allclose(
         Cauchy().sample(3),
-        np.array([0.42659502, 1.78396705, 0.19468154])
+        np.array([1.61365108, 47.42837438, 2.62438296])
     )
     assert np.allclose(
         Cauchy(location=0, scale=10).sample(3),
-        np.array([-230.02239651, 3.28222477, 20.19808807])
+        np.array([-45.05730325, 4.65096137, -0.2699795])
     )
     assert np.allclose(
         Cauchy(location=10, scale=1).sample(3),
-        np.array([9.02117213, 10.03302647, 11.46422113])
+        np.array([11.03625118, 4.69336972, 11.33160151])
     )
     assert np.allclose(
         Cauchy(location=10, scale=10).sample(3),
-        np.array([-27.61098847,   7.27303729,  10.02623666])
+        np.array([17.78125186, 8.3692884, 20.49814144])
     )
 
     # Test .expected_value()

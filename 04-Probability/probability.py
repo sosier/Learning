@@ -891,23 +891,101 @@ class Normal():
         num_samples = # of samples to perform (int >= 1)
         precision = # of samples to use to construct the generating
             approximately normal distribution (higher = more accurate)
+
+        Derivation = the Box-Muller method:
+
+        Let:
+            T = Exponential(lambda=1)
+            U = Uniform(0, 2*pi)
+            and
+            T and U be independent
+            and
+            X = sqrt(2*T) * cos(U)
+            Y = sqrt(2*T) * sin(U)
+
+        PDF(T, U) = PDF(T) * PDF(U)                        (because independent)
+                  = e**-T * 1/(2*pi)
+                  = 1/(2*pi) * e**-T
+
+        PDF(X, Y) = PDF(T, U)
+                    * | determinant( [d(X, Y) / d(T, U)]**-1 ) |
+            ...where PDF(T, U) is in terms of X, Y
+            ...and derivative T, U w/ respect to X, Y
+                = d(T, U) / d(X, Y)
+                = [d(X, Y) / d(T, U)]**-1
+
+        Let:
+            D = d(X, Y) / d(T, U)
+        D = [                                                       (2x2 matrix)
+                [ d(X)/d(T), d(X)/d(U) ],
+                [ d(Y)/d(T), d(Y)/d(U) ]
+            ]
+          = [
+              [ cos(U) * 1/2 * (2*T)**-1/2 * 2, -sqrt(2*T) * sin(U) ],
+              [ sin(U) * 1/2 * (2*T)**-1/2 * 2, sqrt(2*T) * cos(U) ]
+            ]
+          = [
+              [ cos(U) / sqrt(2*T), -sqrt(2*T) * sin(U) ],
+              [ sin(U) / sqrt(2*T), sqrt(2*T) * cos(U) ]
+            ]
+        determinant(D) = [
+                cos(U) / sqrt(2*T) * sqrt(2*T) * cos(U)
+                - -sqrt(2*T) * sin(U) * sin(U) / sqrt(2*T)
+            ]
+          = cos**2(U) + sin**2(U)
+          = sin**2(U) + cos**2(U)
+          = 1                           (Pythagorean Theorem with sin's / cos's)
+
+        | determinant( [d(X, Y) / d(T, U)]**-1 ) |
+            = |determinant(D)|
+            = |1|
+            = 1
+
+        PDF(X, Y)
+            = PDF(T, U) * | determinant( [d(X, Y) / d(T, U)]**-1 ) |
+            = PDF(T, U) * 1
+            = PDF(T, U)                                      ...in terms of X, Y
+            = 1/(2*pi) * e**-T
+
+        ...so need to solve for T in terms of X, Y
+        Reminder:
+            X = sqrt(2*T) * cos(U)
+            Y = sqrt(2*T) * sin(U)
+
+        X**2 = 2*T * cos**2(U)
+        Y**2 = 2*T * sin**2(U)
+
+        X**2 + Y**2 = 2*T * cos**2(U) + 2*T * sin**2(U)
+            = 2*T (cos**2(U) + sin**2(U))
+            = 2*T (sin**2(U) + cos**2(U))
+            = 2*T * 1             (again Pythagorean Theorem with sin's / cos's)
+            = 2*T
+        2*T = X**2 + Y**2
+        T = (X**2 + Y**2) / 2
+
+        PDF(X, Y) = 1/(2*pi) * e**-T                         ...in terms of X, Y
+            = 1/(2*pi) * e**-((X**2 + Y**2) / 2)
+            = 1/(2*pi) * e**(-1/2 *(X**2 + Y**2))
+            = 1/(2*pi) * e**-(X**2/2) * e**-(Y**2/2)
+            = 1/sqrt(2*pi) * e**-(X**2/2) * 1/sqrt(2*pi) * e**-(Y**2/2)
+
+        PDF(Normal(0, 1))
+            = 1/sqrt(2*pi) * e**-(X**2/2) = 1/sqrt(2*pi) * e**-(Y**2/2)
+
+        ...so X and Y are independent Normal(0, 1)
         """
         assert(num_samples >= 1 and type(num_samples) == int)
 
-        # Generate an appoximately normal distribution using the sum of 30
-        # repeated random Uniform(0, 1):
-        raw_data = np.random.rand(precision, 30)
-        raw_data = np.sum(raw_data, axis=1)
-        appox_normal_mean = np.mean(raw_data)
-        appox_normal_standard_deviation = np.std(raw_data)
+        EX = Exponential(lmbda=1).sample(num_samples)
+        U = Uniform(0, 2 * np.pi).sample(num_samples)
 
-        # Repeat the same process to draw our "result" sample from the
-        # approximately normal distribution:
-        result = np.random.rand(num_samples, 30)
-        result = np.sum(result, axis=1)
+        # Make sure EX and U are vectors
+        EX = EX if num_samples > 1 else np.array([EX])
+        U = U if num_samples > 1 else np.array([U])
 
-        # Calculate appoximate normal result to standard normal result:
-        result = (result - appox_normal_mean) / appox_normal_standard_deviation
+        # Use the Exponential and Uniform to calculate samples from a standard
+        # Normal:
+        result = np.sqrt(2 * EX) * np.sin(U)
 
         # Convert to result for this particular Normal:
         result = result * np.sqrt(self.sigma_squared) + self.mu
@@ -1005,6 +1083,18 @@ class Exponential():
     def sample(self, num_samples=1):
         """
         num_samples = # of samples to perform (int >= 1)
+
+        Samples derirved by first picking a uniform value between 0 and 1 to
+        reprsent the results of the Exponential CDF at t and then working
+        backward from that result to solve for t:
+          CDF(t) = 1 - e**(-lambda * t)
+          CDF(t) = result
+          result = 1 - e**(-lambda * t)
+          result = 1 - e**(-lambda * t)
+          result - 1 = -e**(-lambda * t)
+          1 - result = e**(-lambda * t)
+          ln(1 - result) = -lambda * t
+          t = ln(1 - result) / -lambda
         """
         assert(num_samples >= 1 and type(num_samples) == int)
 
