@@ -1,4 +1,4 @@
-_Note: This repo contains the preparatory learning I did to be as prepared as possible for my Master's in Computer Science (specialzing in Machine Learning). As I'm in my Master's program now, I'm no longer actively working through this content._
+_Note: This repo contains the code for the preparatory learning I did to be as prepared as possible for my Master's in Computer Science (specialzing in Machine Learning). As I'm in my Master's program now, I'm no longer actively working through this content._
 
 # Learning Plan
 
